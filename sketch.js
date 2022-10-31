@@ -229,10 +229,3 @@ class Egg {
     image(egg, this.x, this.y, 50, 50);
   }
 }
-
-class testGit {
-  constructor() {
-    this.x;
-    this.y;
-  }
-}
