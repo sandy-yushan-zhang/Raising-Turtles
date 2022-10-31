@@ -189,6 +189,10 @@ class Raccoon {
     this.direction = random(["left", "right"]);
     this.x = -240;
     this.y = 600;
+
+    this.noiseXLoc = random(2000, 3000);
+    this.noiseYLoc = random(3000, 4000);
+
     if (this.direction == "left") {
       this.x = -230;
     } else if (this.direction == "right") {
@@ -203,10 +207,15 @@ class Raccoon {
     }
   }
   move() {
+    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 1, 3);
+    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -0.5, 0.5);
+
     if (this.direction == "left") {
-      this.x += 3;
+      this.x += moveXAmount;
+      this.y += moveYAmount;
     } else if (this.direction == "right") {
-      this.x -= 3;
+      this.x -= moveXAmount;
+      this.y += moveYAmount;
     }
   }
 }
