@@ -140,6 +140,11 @@ function draw() {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
+
+
+
+  noStroke();
+
   strokeWeight(4);
   fill("black");
 
@@ -152,6 +157,10 @@ function draw() {
   text("Click the animal to buy", 900, 900);
   text("Coins Left:  " + coins, 900, 870);
   pop();
+
+
+  console.log(eggs.length);
+
 }
 class Buttons {
   constructor(type, positionx, positiony) {
@@ -336,6 +345,7 @@ class Turtle {
           this.readyToLay = false;
           this.layingEgg = false;
           this.finishLay = false;
+          this.laidEggAmount = 0;
           this.layX = random(50, 1150); // reset so next time lay at a different place
           this.layY = random(630, 760);
         }
