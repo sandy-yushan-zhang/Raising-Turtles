@@ -9,6 +9,8 @@ let sharkL;
 let sharkR;
 let turtlePNG;
 
+let heart;
+
 let raccoon;
 let egg;
 let raccoons = [];
@@ -17,6 +19,8 @@ let buttons = [];
 let raccoonRight;
 let coins = 500;
 let turtleTest;
+let turtles = [];
+let fish = [];
 
 let recbutton, turtButton, fishbutton, sharkButton;
 
@@ -36,6 +40,7 @@ function preload() {
   raccoon = loadImage("images/jump0001.png");
   raccoonRight = loadImage("images/racRight.png");
   egg = loadImage("images/egg.png");
+  heart = loadImage("images/heart.png");
 }
 
 function setup() {
@@ -52,6 +57,12 @@ function setup() {
   let tmpRac2 = new Raccoon("left");
   raccoons.push(tmpRac2);
   turtleTest = new Turtle();
+  for (let i = 0; i < 5; i++) {
+    turtles.push(new Turtle());
+  }
+  for (let i = 0; i < 10; i++) {
+    fish.push(new Fish());
+  }
   sharkT = new Shark("right");
 
   recbutton = new Buttons("rac", 100, 870);
@@ -73,21 +84,46 @@ function draw() {
   noFill();
   rect(10, 10, 1180, 500); // in the ocean
 
-  turtleTest.display();
-  turtleTest.move();
+  rect(50, 630, 1100, 130); // places to lay egg
+
+  for (let i = 0; i < turtles.length; i++) {
+    turtles[i].display();
+    if (!turtles[i].layingEgg) {
+      turtles[i].move();
+    }
+
+    if (turtles[i].alive == false) {
+      turtles.splice(i, 1);
+      i -= 1;
+    }
+    if (turtles[i].fecund) {
+      turtles[i].layEgg();
+    }
+  }
   sharkT.display();
   sharkT.move();
-  image(fish1R, 200, 200, 40, 20);
-  image(fish2R, 300, 200, 40, 20);
-  image(fish3R, 400, 200, 40, 20);
-
-  // background("grey");
-  push();
-  imageMode(CENTER);
-  if (frameCount % 300 == 0) {
-    let tmpEgg = new Egg();
-    eggs.push(tmpEgg);
+  for (let i = 0; i < fish.length; i++) {
+    fish[i].display();
+    fish[i].move();
+    // if (fish[i].caught) {
+    //   fish[i].beingEat();
+    // }
+    if (fish[i].alive == false) {
+      fish.splice(i, 1);
+      i -= 1;
+    }
   }
+  // background("grey");
+
+  if (frameCount % 200 == 0) {
+    let tmpRaccoon = new Raccoon();
+    raccoons.push(tmpRaccoon);
+  }
+  // if (frameCount % 400 == 0) {
+  //   let tmpEgg = new Egg();
+  //   eggs.push(tmpEgg);
+  // }
+  //console.log(eggs);
 
   for (let i = 0; i < raccoons.length; i++) {
     raccoons[i].display();
@@ -158,17 +194,59 @@ class Turtle {
     this.y = random(10, 500);
     this.noiseXLoc = random(1000);
     this.noiseYLoc = random(1000, 2000);
+    this.moveXAmount;
+    this.moveYAmount;
+    this.layingEgg = false;
+    this.readyToLay = false; // when move to position, then it's ready
+    this.finishLay = false; // when finish laying eggs, turtle go back to ocean, after went back, change layingEgg and readyToLay to false
+    this.laidEggAmount = 0;
+    this.layingEggTrack = 0; // set to 0 frame count when the turtles starts to lay, keep track of frames when turtle lay eggs
+
+    this.lives = 5;
+    this.alive = true;
+    this.fecundId = int(random(2));
+    if (this.fecundId == 0) {
+      this.fecund = true;
+      this.eggTime = int(random(5, 11)); // how long does it lay an egg, for testing purpose, randomly from 5-10 seconds lay an egg
+      this.eggAmount = int(random(1, 2)); // randomly lay 2-3 eggs
+      this.layX = random(50, 1150); // where to lay eggs
+      this.layY = random(630, 760);
+    } else {
+      this.fecund = false;
+    }
+
+    this.goBackX; // where the turtle goes back after laid eggs
+    this.goBackY;
   }
 
   display() {
     image(turtlePNG, this.x, this.y, 80, 40);
+    let hpDistance = 0;
+    for (let i = 0; i < this.lives; i++) {
+      image(heart, this.x + 16 + hpDistance, this.y - 10, 7, 7);
+      hpDistance += 10;
+    }
+
+    // Slowly decrease lives
+    if (frameCount % 60000 == 0) {
+      this.lives -= 1;
+    }
+    if (this.lives == 0) {
+      this.alive = false;
+    }
+
+    strokeWeight(1);
+    rect(this.x + 25, this.y + 10, 30, 30);
+    stroke("purple");
+    strokeWeight(10);
+    point(this.x + 40, this.y + 30);
   }
 
   move() {
-    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, -1, 1);
-    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -0.5, 0.5);
-    this.x += moveXAmount;
-    this.y += moveYAmount;
+    this.moveXAmount = map(noise(this.noiseXLoc), 0, 1, -1, 1);
+    this.moveYAmount = map(noise(this.noiseYLoc), 0, 1, -1, 1);
+    this.x += this.moveXAmount;
+    this.y += this.moveYAmount;
     this.noiseXLoc += 0.01;
     this.noiseYLoc += 0.01;
     if (this.x >= 980) {
@@ -182,6 +260,84 @@ class Turtle {
     }
     if (this.y <= 10) {
       this.y = 10;
+    }
+  }
+
+  layEgg() {
+    if (frameCount % 120 == 0) {
+      this.layingEgg = true;
+    }
+    if (this.layingEgg) {
+      if (!this.readyToLay) {
+        console.log("MOVE");
+        if (this.x > this.layX + 5 || this.y > this.layY + 5) {
+          if (this.x > this.layX + 5) {
+            this.x -= random(0.5, 1);
+          }
+          if (this.y > this.layY + 5) {
+            this.y -= random(0.5, 1);
+          }
+        } else if (this.x < this.layX - 5 || this.y < this.layY - 5) {
+          if (this.x < this.layX - 5) {
+            this.x += random(0.5, 1);
+          }
+          if (this.y < this.layY - 5) {
+            this.y += random(0.5, 1);
+          }
+        } else {
+          this.readyToLay = true;
+        }
+      }
+
+      if (this.readyToLay) {
+        // lay egg one by one
+        if (!this.finishLay) {
+          console.log("LAID", this.laidEggAmount);
+          console.log("TOTAL", this.eggAmount);
+          if (this.laidEggAmount < this.eggAmount) {
+            if (this.layingEggTrack % (this.eggTime * 60) == 0) {
+              let tempEggX = this.x + random(-10, 90);
+              let tempEggY = (this.y += random(-20, 0));
+              eggs.push(new Egg(tempEggX, tempEggY));
+              this.laidEggAmount++;
+              this.layingEggTrack++;
+            }
+          } else {
+            console.log("FINISH!!!!!!!!!!");
+            this.finishLay = true;
+            this.layingEggTrack = 0;
+            this.goBackX = random(10, 980);
+            this.goBackY = random(400, 500);
+          }
+        }
+      }
+
+      if (this.finishLay) {
+        console.log("X: ", this.goBackX);
+        console.log("Y: ", this.goBackY);
+        point(this.goBackX, this.goBackY);
+        if (
+          this.x > this.goBackX + 5 ||
+          this.x < this.goBackX - 5 ||
+          this.y > this.goBackY + 5
+        ) {
+          if (this.x > this.goBackX + 5) {
+            this.x -= random(0.5, 1);
+          }
+          if (this.x < this.goBackX - 5) {
+            this.x += random(0.5, 1);
+          }
+          if (this.y > this.goBackY + 5) {
+            this.y -= random(0.5, 1);
+          }
+        } else {
+          this.readyToLay = false;
+          this.layingEgg = false;
+          this.finishLay = false;
+          this.layX = random(50, 1150); // reset so next time lay at a different place
+          this.layY = random(630, 760);
+        }
+      }
     }
   }
 }
@@ -220,9 +376,9 @@ class Shark {
     this.noiseXLoc += 0.01;
     this.noiseYLoc += 0.01;
     if (this.d == "right") {
-      if (this.x >= 1100) {
+      if (this.x >= 1400) {
         this.d = "left";
-        this.x = random(1100, 1150);
+        this.x = random(1300, 1400);
       }
     } else if (this.d == "left") {
       if (this.x <= -300) {
@@ -258,18 +414,147 @@ class Fish {
     } else if (this.dId == 1) {
       this.d = "left";
     }
-    this.y = random(20, 400);
+    if (this.d == "right") {
+      this.x = random(-200, -70);
+    } else if (this.d == "left") {
+      this.x = random(1250, 1380);
+    }
+    this.y = random(20, 470);
     this.noiseXLoc = random(4000, 5000);
     this.noiseYLoc = random(5000, 6000);
+    this.alive = true;
+    this.caught = false;
+    this.caughtX;
+    this.caughtY;
   }
 
   display() {
     if (this.id == 0) {
       if (this.d == "right") {
-        image(fish1R, this.x, this.y);
+        image(fish1R, this.x, this.y, 40, 20);
+      } else if (this.d == "left") {
+        image(fish1L, this.x, this.y, 40, 20);
+      }
+    } else if (this.id == 1) {
+      if (this.d == "right") {
+        image(fish2R, this.x, this.y, 40, 20);
+      } else if (this.d == "left") {
+        image(fish2L, this.x, this.y, 40, 20);
+      }
+    } else if (this.id == 2) {
+      if (this.d == "right") {
+        image(fish3R, this.x, this.y, 40, 20);
+      } else if (this.d == "left") {
+        image(fish3L, this.x, this.y, 40, 20);
       }
     }
+
+    point(this.x + 20, this.y + 10);
+
+    if (this.caught) {
+      point(this.x + 30, this.y + 10);
+    }
   }
+
+  move() {
+    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 0, 3);
+    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -0.5, 0.5);
+
+    this.y += moveYAmount;
+    if (this.d == "right") {
+      this.x += moveXAmount;
+    } else if (this.d == "left") {
+      this.x -= moveXAmount;
+    }
+    this.noiseXLoc += 0.01;
+    this.noiseYLoc += 0.01;
+    if (this.d == "right") {
+      if (this.x >= 1380) {
+        this.d = "left";
+        this.x = random(1250, 1380);
+      }
+    } else if (this.d == "left") {
+      if (this.x <= -200) {
+        this.d = "right";
+        this.x = random(-70, -200);
+      }
+    }
+
+    if (this.y >= 470) {
+      this.y = 470;
+    }
+    if (this.y <= 10) {
+      this.y = 10;
+    }
+
+    // check if the fish will be caught by any turtle; if will be caught, then catch by turtle and eat by turtle
+    for (let i = 0; i < turtles.length; i++) {
+      let liveDist = dist(
+        this.x + 20,
+        this.y + 10,
+        turtles[i].x + 40,
+        turtles[i].y + 30
+      );
+      if (this.caught == false) {
+        if (liveDist <= 20) {
+          this.caught = true;
+          this.caughtX = turtles[i].x;
+          this.caughtY = turtles[i].y;
+        }
+      }
+      if (liveDist <= 20) {
+        this.alive = false;
+        if (turtles[i].lives < 5) {
+          turtles[i].lives += 1;
+        }
+
+        // DO NOT DELETE ----------------------------------------------------------------
+        // (HOW TO LET THIS FISH REMEMBER WHICH TURTLE EATS IT)
+        // this.caught = true;
+        // this.caughtX = turtles[i].x;
+        // this.caughtY = turtles[i].y;
+        // DO NOT DELETE ----------------------------------------------------------------
+      }
+      // DO NOT DELETE ------------------------------------------------------------------
+      // if fish is caught, drag to turtle's mouth and die
+      // if (this.caught) {
+      //   if (this.x + 20 >= this.caughtX + 40) {
+      //     this.x -= 0.01;
+      //   } else if (this.x + 20 <= this.caughtX + 40) {
+      //     this.x += 0.01;
+      //   }
+      //   if (this.y + 10 >= this.caughtY + 30) {
+      //     this.y -= 0.01;
+      //   } else if (this.y + 10 <= this.caughtY + 30) {
+      //     this.y += 0.01;
+      //   }
+      // }
+      // if (dist(this.x + 20, 100, turtles[i].x + 40, 100) <= 7) {
+      //   if (dist(100, this.y + 10, 100, turtles[i].y + 30) <= 7) {
+      //     this.alive = false;
+      //   }
+      // }
+      // DO NOT DELETE --------------------------------------------------------------------
+    }
+  }
+
+  // beingEat() {
+  //   if (this.x + 20 >= this.caughtX + 40) {
+  //     this.x -= 0.01;
+  //   } else if (this.x + 20 <= this.caughtX + 40) {
+  //     this.x += 0.01;
+  //   }
+  //   if (this.y + 10 >= this.caughtY + 30) {
+  //     this.y -= 0.01;
+  //   } else if (this.y + 10 <= this.caughtY + 30) {
+  //     this.y += 0.01;
+  //   }
+  //   if (dist(this.x + 20, 100, this.caughtX, 100) <= 7) {
+  //     if (dist(100, this.y + 10, 100, this.caughtY + 30) <= 7) {
+  //       this.alive = false;
+  //     }
+  //   }
+  // }
 }
 
 class Raccoon {
@@ -326,11 +611,11 @@ class Raccoon {
 }
 
 class Egg {
-  constructor() {
-    this.x = random(50, 1050);
-    this.y = random(600, 700);
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
   }
   display() {
-    image(egg, this.x, this.y, 50, 50);
+    image(egg, this.x, this.y, 30, 30);
   }
 }
