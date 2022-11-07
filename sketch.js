@@ -133,12 +133,13 @@ function draw() {
   for (let j = 0; j < eggs.length; j++) {
     eggs[j].display();
   }
+
+  push();
+  imageMode(CENTER);
   for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
-
-  pop();
   strokeWeight(4);
   fill("black");
 
@@ -150,6 +151,7 @@ function draw() {
   textSize(22);
   text("Click the animal to buy", 900, 900);
   text("Coins Left:  " + coins, 900, 870);
+  pop();
 }
 class Buttons {
   constructor(type, positionx, positiony) {
