@@ -138,7 +138,8 @@ function draw() {
     buttons[buttoni].checkClick();
   }
 
-  pop();
+  push();
+  noStroke();
   strokeWeight(4);
   fill("black");
 
@@ -150,7 +151,7 @@ function draw() {
   textSize(22);
   text("Click the animal to buy", 900, 900);
   text("Coins Left:  " + coins, 900, 870);
-  push();
+  pop();
 
   console.log(eggs.length);
 }
