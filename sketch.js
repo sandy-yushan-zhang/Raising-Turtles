@@ -589,7 +589,7 @@ class Raccoon {
   move() {
     let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 0, 1);
     let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -1, 1);
-    this.y = constrain(this.y, 550, 720);
+    //this.y = constrain(this.y, 550, 720);
     if (this.direction == "left") {
       this.x += moveXAmount;
       this.y += moveYAmount;
@@ -605,6 +605,14 @@ class Raccoon {
       this.x = 980;
       this.direction = "right";
     }
+    if (this.y <= 550) {
+      this.y = 550;
+    }
+    if (this.y >= 720) {
+      this.y = 720;
+    }
+    this.noiseXLoc += 0.01;
+    this.noiseYLoc += 0.01;
   }
   checkCollision() {
     for (let n = 0; n < eggs.length; n++) {
