@@ -13,10 +13,15 @@ let raccoon;
 let egg;
 let raccoons = [];
 let eggs = [];
+let buttons = [];
 let raccoonRight;
-
+let coins = 500;
 let turtleTest;
 
+let recbutton, turtButton, fishbutton, sharkButton;
+
+let d = 0;
+let coinFlag = 0;
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -34,18 +39,40 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1200, 800);
+  //original 1200,800, changing it now to add buttons
+  createCanvas(1200, 950);
   noiseDetail(24);
 
+  // for (let num = 0; num < 2; num++) {
+  //   let tmpRaccoon = new Raccoon();
+  //   raccoons.push(tmpRaccoon);
+  // }
+  let tmpRac = new Raccoon("right");
+  raccoons.push(tmpRac);
+  let tmpRac2 = new Raccoon("left");
+  raccoons.push(tmpRac2);
   turtleTest = new Turtle();
   sharkT = new Shark("right");
+
+  recbutton = new Buttons("rac", 100, 870);
+  turtButton = new Buttons("turt", 300, 870);
+  sharkButton = new Buttons("shark", 540, 870);
+  fishbutton = new Buttons("fish", 740, 870);
+  buttons.push(recbutton);
+  buttons.push(turtButton);
+  buttons.push(sharkButton);
+  buttons.push(fishbutton);
 }
 
 function draw() {
+  noStroke();
   image(ocean, 0, 0, 1200, 800);
-
+  fill("white");
+  //this is a white rec for displaying buttons
+  rect(0, 800, 1200, 150);
   noFill();
   rect(10, 10, 1180, 500); // in the ocean
+
   turtleTest.display();
   turtleTest.move();
   sharkT.display();
@@ -55,24 +82,76 @@ function draw() {
   image(fish3R, 400, 200, 40, 20);
 
   // background("grey");
-  if (frameCount % 200 == 0) {
-    let tmpRaccoon = new Raccoon();
-    raccoons.push(tmpRaccoon);
-  }
-  if (frameCount % 400 == 0) {
+  push();
+  imageMode(CENTER);
+  if (frameCount % 300 == 0) {
     let tmpEgg = new Egg();
     eggs.push(tmpEgg);
   }
-  console.log(eggs);
+
   for (let i = 0; i < raccoons.length; i++) {
     raccoons[i].display();
     raccoons[i].move();
+    raccoons[i].checkCollision();
   }
   for (let j = 0; j < eggs.length; j++) {
     eggs[j].display();
   }
-}
+  for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
+    buttons[buttoni].display();
+    buttons[buttoni].checkClick();
+  }
 
+  pop();
+  strokeWeight(4);
+  fill("black");
+
+  textSize(18);
+  text("100 coins", 50, 930);
+  text("500 coins", 270, 930);
+  text("100 coins", 500, 930);
+  text("100 coins", 700, 930);
+  textSize(22);
+  text("Click the animal to buy", 900, 900);
+  text("Coins Left:  " + coins, 900, 870);
+}
+class Buttons {
+  constructor(type, positionx, positiony) {
+    this.type = type;
+    this.x = positionx;
+    this.y = positiony;
+  }
+  display() {
+    if (this.type == "rac") {
+      image(raccoonRight, this.x, this.y, 150, 150);
+    } else if (this.type == "turt") {
+      image(turtlePNG, this.x, this.y, 100, 60);
+    } else if (this.type == "shark") {
+      image(sharkL, this.x, this.y, 100, 100);
+    } else if (this.type == "fish") {
+      image(fish1L, this.x, this.y, 100, 100);
+    }
+  }
+  checkClick() {
+    d = dist(mouseX, mouseY, this.x, this.y);
+    console.log(d);
+    if (mouseIsPressed == true && d <= 40) {
+      console.log("button press");
+      if (coins <= 0) {
+        coinFlag = 1;
+      }
+      if (this.type == "turt" && coinFlag == 0) {
+        console.log("what");
+        coins -= 500;
+      } else {
+        if (coinFlag == 0) {
+          coins -= 100;
+        }
+      }
+    }
+    mouseIsPressed = false;
+  }
+}
 class Turtle {
   constructor() {
     this.x = random(10, 980);
@@ -159,6 +238,15 @@ class Shark {
       this.y = 10;
     }
   }
+  // checkTurtle(){
+  //   for (let turtNum = 0; n < turtle.length; n++) {
+  //     let disA = dist(this.x, this.y, eggs[n].x, eggs[n].y);
+  //     if (disA <= 100) {
+  //       // console.log(disA);
+  //       eggs.splice(n, 1);
+  //     }
+  //   }
+  // }
 }
 
 class Fish {
@@ -185,18 +273,18 @@ class Fish {
 }
 
 class Raccoon {
-  constructor() {
-    this.direction = random(["left", "right"]);
-    this.x = -240;
-    this.y = 600;
+  constructor(direction) {
+    this.direction = direction;
 
     this.noiseXLoc = random(2000, 3000);
     this.noiseYLoc = random(3000, 4000);
 
     if (this.direction == "left") {
-      this.x = -230;
+      this.x = 11;
+      this.y = 600;
     } else if (this.direction == "right") {
-      this.x = 1240;
+      this.x = 980;
+      this.y = 600;
     }
   }
   display() {
@@ -207,15 +295,32 @@ class Raccoon {
     }
   }
   move() {
-    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 1, 3);
-    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -0.5, 0.5);
-
+    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 0, 1);
+    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -1, 1);
+    this.y = constrain(this.y, 550, 720);
     if (this.direction == "left") {
       this.x += moveXAmount;
       this.y += moveYAmount;
     } else if (this.direction == "right") {
       this.x -= moveXAmount;
       this.y += moveYAmount;
+    }
+    if (this.x >= 1000) {
+      this.x = 11;
+      this.direction = "left";
+    }
+    if (this.x <= 10) {
+      this.x = 980;
+      this.direction = "right";
+    }
+  }
+  checkCollision() {
+    for (let n = 0; n < eggs.length; n++) {
+      let disA = dist(this.x, this.y, eggs[n].x, eggs[n].y);
+      if (disA <= 100) {
+        // console.log(disA);
+        eggs.splice(n, 1);
+      }
     }
   }
 }
