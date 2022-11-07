@@ -124,7 +124,8 @@ function draw() {
   //   eggs.push(tmpEgg);
   // }
   //console.log(eggs);
-
+  push();
+  imageMode(CENTER);
   for (let i = 0; i < raccoons.length; i++) {
     raccoons[i].display();
     raccoons[i].move();
@@ -134,14 +135,10 @@ function draw() {
     eggs[j].display();
   }
 
-  push();
-  imageMode(CENTER);
   for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
-
-
 
   noStroke();
 
@@ -158,9 +155,7 @@ function draw() {
   text("Coins Left:  " + coins, 900, 870);
   pop();
 
-
   console.log(eggs.length);
-
 }
 class Buttons {
   constructor(type, positionx, positiony) {
