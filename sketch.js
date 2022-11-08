@@ -68,7 +68,7 @@ function setup() {
     fish.push(new Fish());
   }
   sharkT = new Shark("right");
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 2; i++) {
     let dir = int(random(2));
     if (dir == 0) {
       sharks.push(new Shark("left"));
@@ -142,17 +142,17 @@ function draw() {
   //console.log(eggs);
   push();
   imageMode(CENTER);
-  for (let i = 0; i < raccoons.length; i++) {
-    raccoons[i].display();
-    raccoons[i].move();
-    raccoons[i].checkCollision();
-  }
   for (let j = 0; j < eggs.length; j++) {
     eggs[j].display();
     if (eggs[j].isAlive == false) {
       eggs.splice(j, 1);
       j -= 1;
     }
+  }
+  for (let i = 0; i < raccoons.length; i++) {
+    raccoons[i].display();
+    raccoons[i].move();
+    raccoons[i].checkCollision();
   }
 
   for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
@@ -304,7 +304,7 @@ class Turtle {
   }
 
   layEgg() {
-    if (frameCount % 300 == 0) {
+    if (frameCount % 60 == 0) {
       this.layingEgg = true;
     }
     if (this.layingEgg) {
