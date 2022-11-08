@@ -8,7 +8,7 @@ let fish3R;
 let sharkL;
 let sharkR;
 let turtlePNG;
-
+let cnv;
 let heart;
 
 let raccoon;
@@ -47,7 +47,9 @@ function preload() {
 
 function setup() {
   //original 1200,800, changing it now to add buttons
-  createCanvas(1200, 950);
+  cnv = createCanvas(1200, 950);
+  cnv.id("p5canvas");
+  cnv.parent("#container");
   noiseDetail(24);
 
   // for (let num = 0; num < 2; num++) {
@@ -87,7 +89,7 @@ function setup() {
 function draw() {
   noStroke();
   image(ocean, 0, 0, 1200, 800);
-  fill("white");
+  fill(44, 128, 205);
   //this is a white rec for displaying buttons
   rect(0, 800, 1200, 150);
   noFill();
