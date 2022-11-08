@@ -59,14 +59,21 @@ function setup() {
   let tmpRac2 = new Raccoon("left");
   raccoons.push(tmpRac2);
   turtleTest = new Turtle();
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 20; i++) {
     turtles.push(new Turtle());
   }
   for (let i = 0; i < 10; i++) {
     fish.push(new Fish());
   }
   sharkT = new Shark("right");
-  sharks.push(sharkT);
+  for (let i = 0; i < 10; i++) {
+    let dir = int(random(2));
+    if (dir == 0) {
+      sharks.push(new Shark("left"));
+    } else {
+      sharks.push(new Shark("right"));
+    }
+  }
   recbutton = new Buttons("rac", 100, 870, 100);
   turtButton = new Buttons("turt", 300, 870, 500);
   sharkButton = new Buttons("shark", 540, 870, 100);
@@ -89,19 +96,20 @@ function draw() {
   rect(50, 630, 1100, 130); // places to lay egg
 
   for (let i = 0; i < turtles.length; i++) {
-    turtles[i].display();
-    if (!turtles[i].layingEgg) {
-      turtles[i].move();
-    }
-
     if (turtles[i].alive == false) {
       turtles.splice(i, 1);
       i -= 1;
-    }
-    if (turtles[i].fecund == true) {
-      turtles[i].layEgg();
+    } else {
+      turtles[i].display();
+      if (!turtles[i].layingEgg) {
+        turtles[i].move();
+      }
+      if (turtles[i].fecund == true) {
+        turtles[i].layEgg();
+      }
     }
   }
+
   for (let sharki = 0; sharki < sharks.length; sharki++) {
     sharks[sharki].display();
     sharks[sharki].move();
@@ -234,6 +242,7 @@ class Turtle {
     this.lives = 5;
     this.alive = true;
     this.fecundId = int(random(2));
+    this.fecund;
     if (this.fecundId == 0) {
       this.fecund = true;
       this.eggTime = int(random(5, 11)); // how long does it lay an egg, for testing purpose, randomly from 5-10 seconds lay an egg
@@ -293,7 +302,7 @@ class Turtle {
   }
 
   layEgg() {
-    if (frameCount % 120 == 0) {
+    if (frameCount % 300 == 0) {
       this.layingEgg = true;
     }
     if (this.layingEgg) {
