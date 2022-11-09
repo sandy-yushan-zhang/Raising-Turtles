@@ -27,7 +27,6 @@ let sharks = [];
 
 let flagEnd;
 
-
 let recbutton, turtButton, fishbutton, sharkButton;
 let counter = 0;
 let counterStart = 0;
@@ -44,6 +43,7 @@ let turtEnd;
 let turtCount = 0;
 let endMessage;
 let counterEnd = 0;
+let tmpV = 0;
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -64,11 +64,7 @@ function preload() {
 function setup() {}
 
 function draw() {
-
-
-
   if (counter < 1 || counterStart < 1 || counterEnd < 1) {
-
     //getItem("startFlag") == null
     if (startFlag == 0 && counter < 1) {
       intro = createP(
@@ -89,7 +85,7 @@ function draw() {
     ) {
       console.log("any dies");
       endMessage = createP(
-        "The game is over, thank you for raising the turtles. <br>The total amount of turtles you have raised during this game is: " +
+        "<br><br><br><br>The game is over, thank you for raising the turtles. <br>The total amount of turtles you have raised during this game is: " +
           turtCount
       );
       endMessage.id("end");
@@ -126,7 +122,6 @@ function draw() {
       raccoons.push(new Raccoon("left"));
       raccoons.push(new Raccoon("right"));
       for (let i = 0; i < 5; i++) {
-
         turtles.push(new Turtle(0));
       }
       for (let i = 0; i < 10; i++) {
@@ -417,7 +412,7 @@ class Turtle {
   move() {
     if (!this.newBorn) {
       this.moveXAmount = map(noise(this.noiseXLoc), 0, 1, -1, 1);
-      this.moveYAmount = map(noise(this.noiseYLoc), 0, 1, -1.5, 1.5);
+      this.moveYAmount = map(noise(this.noiseYLoc), 0, 1, -2, 2);
       this.x += this.moveXAmount;
       this.y += this.moveYAmount;
       this.noiseXLoc += 0.01;
@@ -609,8 +604,8 @@ class Shark {
       }
     }
 
-    if (this.y >= 300) {
-      this.y = 300;
+    if (this.y >= 400) {
+      this.y = 400;
     }
     if (this.y <= 10) {
       this.y = 10;
