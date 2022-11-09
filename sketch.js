@@ -56,19 +56,29 @@ function setup() {
   //   let tmpRaccoon = new Raccoon();
   //   raccoons.push(tmpRaccoon);
   // }
-  let tmpRac = new Raccoon("right");
-  //raccoons.push(tmpRac);
-  let tmpRac2 = new Raccoon("left");
-  //raccoons.push(tmpRac2);
+  // let tmpRac = new Raccoon("right");
+  // raccoons.push(tmpRac);
+  // let tmpRac2 = new Raccoon("left");
+  // raccoons.push(tmpRac2);
+
+  for (let i = 0; i < 2; i++) {
+    let dId = int(random(2));
+    if (dId == 0) {
+      raccoons.push(new Raccoon("right"));
+    } else if (dId == 1) {
+      raccoons.push(new Raccoon("left"));
+    }
+  }
+
   turtleTest = new Turtle();
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     turtles.push(new Turtle(0));
   }
   for (let i = 0; i < 10; i++) {
     fish.push(new Fish());
   }
   sharkT = new Shark("right");
-  for (let i = 0; i < 0; i++) {
+  for (let i = 0; i < 2; i++) {
     let dir = int(random(2));
     if (dir == 0) {
       sharks.push(new Shark("left"));
@@ -118,6 +128,10 @@ function draw() {
     sharks[sharki].display();
     sharks[sharki].move();
     sharks[sharki].checkTurtle();
+    if (sharks[sharki].alive == false) {
+      sharks.splice(sharki, 1);
+      sharki -= 1;
+    }
   }
 
   for (let i = 0; i < fish.length; i++) {
@@ -133,10 +147,10 @@ function draw() {
   }
   // background("grey");
 
-  if (frameCount % 200 == 0) {
-    let tmpRaccoon = new Raccoon();
-    raccoons.push(tmpRaccoon);
-  }
+  // if (frameCount % 200 == 0) {
+  //   let tmpRaccoon = new Raccoon();
+  //   raccoons.push(tmpRaccoon);
+  // }
   // if (frameCount % 400 == 0) {
   //   let tmpEgg = new Egg();
   //   eggs.push(tmpEgg);
@@ -156,6 +170,10 @@ function draw() {
     raccoons[i].display();
     raccoons[i].move();
     raccoons[i].checkCollision();
+    if (raccoons[i].alive == false) {
+      raccoons.splice(i, 1);
+      i -= 1;
+    }
   }
 
   for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
@@ -429,6 +447,8 @@ class Shark {
     this.y = random(20, 300);
     this.noiseXLoc = random(2000, 3000);
     this.noiseYLoc = random(3000, 4000);
+    this.lives = 5;
+    this.alive = true;
   }
 
   display() {
@@ -444,6 +464,19 @@ class Shark {
       strokeWeight(10);
       // rect(this.x + 15, this.y - 35, 50, 50);
       point(this.x + 45, this.y + 45);
+    }
+
+    let hpDistance = 0;
+    for (let i = 0; i < this.lives; i++) {
+      image(heart, this.x + +35 + hpDistance, this.y - 10, 10, 10);
+      hpDistance += 18;
+    }
+    // Slowly decrease lives
+    if (frameCount % 300 == 0) {
+      this.lives -= 1;
+    }
+    if (this.lives == 0) {
+      this.alive = false;
     }
   }
 
@@ -502,6 +535,9 @@ class Shark {
       if (turtDis <= 50) {
         // console.log(disA);
         turtles[turtNum].alive = false;
+        if (this.lives < 5) {
+          this.lives += 1;
+        }
       }
     }
   }
@@ -528,6 +564,8 @@ class Fish {
     this.caught = false;
     this.caughtX;
     this.caughtY;
+
+    this.lives = 5;
   }
 
   display() {
@@ -555,6 +593,19 @@ class Fish {
 
     if (this.caught) {
       point(this.x + 30, this.y + 10);
+    }
+
+    let hpDistance = 0;
+    for (let i = 0; i < this.lives; i++) {
+      image(heart, this.x + hpDistance, this.y - 10, 5, 5);
+      hpDistance += 8;
+    }
+    // Slowly decrease lives
+    if (frameCount % 300000 == 0) {
+      this.lives -= 1;
+    }
+    if (this.lives == 0) {
+      this.alive = false;
     }
   }
 
@@ -673,6 +724,9 @@ class Raccoon {
       this.x = 1200;
       this.y = 600;
     }
+
+    this.lives = 5;
+    this.alive = true;
   }
   display() {
     strokeWeight(1);
@@ -689,6 +743,25 @@ class Raccoon {
       // stroke("red");
       // strokeWeight(10);
       // point(this.x - 40, this.y - 10);
+    }
+
+    let hpDistance = 0;
+    let hpXPos;
+    if (this.direction == "right") {
+      hpXPos = -62;
+    } else if (this.direction == "left") {
+      hpXPos = -11;
+    }
+    for (let i = 0; i < this.lives; i++) {
+      image(heart, this.x + hpXPos + hpDistance, this.y - 80, 9, 9);
+      hpDistance += 18;
+    }
+    // Slowly decrease lives
+    if (frameCount % 300 == 0) {
+      this.lives -= 1;
+    }
+    if (this.lives == 0) {
+      this.alive = false;
     }
   }
   move() {
@@ -732,6 +805,10 @@ class Raccoon {
       if (disA <= 40) {
         // console.log(disA);
         eggs[n].isAlive = false;
+
+        if (this.lives < 5) {
+          this.lives += 1;
+        }
       }
     }
   }
