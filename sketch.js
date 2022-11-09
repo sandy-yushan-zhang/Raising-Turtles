@@ -24,9 +24,10 @@ let turtleTest;
 let turtles = [];
 let fish = [];
 let sharks = [];
+
 let flagEnd;
-//let disA;
-//let turtDis;
+
+
 let recbutton, turtButton, fishbutton, sharkButton;
 let counter = 0;
 let counterStart = 0;
@@ -60,65 +61,14 @@ function preload() {
   heart = loadImage("images/heart.png");
 }
 
-function setup() {
-  /*
-
-  //original 1200,800, changing it now to add buttons
-  cnv = createCanvas(1200, 950);
-  cnv.id("p5canvas");
-  cnv.parent("#container");
-  noiseDetail(24);
-
-  // for (let num = 0; num < 2; num++) {
-  //   let tmpRaccoon = new Raccoon();
-  //   raccoons.push(tmpRaccoon);
-  // }
-  // let tmpRac = new Raccoon("right");
-  // raccoons.push(tmpRac);
-  // let tmpRac2 = new Raccoon("left");
-  // raccoons.push(tmpRac2);
-
-  for (let i = 0; i < 2; i++) {
-    let dId = int(random(2));
-    if (dId == 0) {
-      raccoons.push(new Raccoon("right"));
-    } else if (dId == 1) {
-      raccoons.push(new Raccoon("left"));
-    }
-  }
-
-  turtleTest = new Turtle();
-  for (let i = 0; i < 5; i++) {
-    turtles.push(new Turtle(0));
-  }
-  for (let i = 0; i < 10; i++) {
-    fish.push(new Fish());
-  }
-  sharkT = new Shark("right");
-  for (let i = 0; i < 2; i++) {
-    let dir = int(random(2));
-    if (dir == 0) {
-      sharks.push(new Shark("left"));
-    } else {
-      sharks.push(new Shark("right"));
-    }
-  }
-  recbutton = new Buttons("rac", 100, 870, 100);
-  turtButton = new Buttons("turt", 300, 870, 500);
-  sharkButton = new Buttons("shark", 540, 870, 100);
-  fishbutton = new Buttons("fish", 740, 870, 100);
-  buttons.push(recbutton);
-  buttons.push(turtButton);
-  buttons.push(sharkButton);
-  buttons.push(fishbutton);
-  */
-}
+function setup() {}
 
 function draw() {
-  //====
-  console.log(sharkEnd);
-  console.log("racend", racEnd);
+
+
+
   if (counter < 1 || counterStart < 1 || counterEnd < 1) {
+
     //getItem("startFlag") == null
     if (startFlag == 0 && counter < 1) {
       intro = createP(
@@ -164,28 +114,26 @@ function draw() {
       noiseDetail(24);
       cnv.parent("#container");
 
-      // for (let num = 0; num < 2; num++) {
-      //   let tmpRaccoon = new Raccoon();
-      //   raccoons.push(tmpRaccoon);
+      // for (let i = 0; i < 2; i++) {
+      //   let dId = int(random(2));
+      //   if (dId == 0) {
+      //     raccoons.push(new Raccoon("right"));
+      //   } else if (dId == 1) {
+      //     raccoons.push(new Raccoon("left"));
+      //   }
       // }
-      for (let i = 0; i < 2; i++) {
-        let dId = int(random(2));
-        if (dId == 0) {
-          raccoons.push(new Raccoon("right"));
-        } else if (dId == 1) {
-          raccoons.push(new Raccoon("left"));
-        }
-      }
-      //turtleTest = new Turtle();
-      for (let i = 0; i < 1; i++) {
-        turtCount += 1;
+
+      raccoons.push(new Raccoon("left"));
+      raccoons.push(new Raccoon("right"));
+      for (let i = 0; i < 5; i++) {
+
         turtles.push(new Turtle(0));
       }
       for (let i = 0; i < 10; i++) {
         fish.push(new Fish());
       }
       sharkT = new Shark("right");
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 1; i++) {
         let dir = int(random(2));
         if (dir == 0) {
           sharks.push(new Shark("left"));
@@ -425,12 +373,13 @@ class Turtle {
 
     this.lives = 5;
     this.alive = true;
+    this.liveCount = 1;
     this.fecundId = int(random(2));
     this.fecund;
     if (this.fecundId == 0) {
       this.fecund = true;
-      this.eggTime = int(random(5, 11)); // how long does it lay an egg, for testing purpose, randomly from 5-10 seconds lay an egg
-      this.eggAmount = int(random(1, 2)); // randomly lay 2-3 eggs
+      this.eggTime = int(random(1200, 1801)); // for how many frameCount does it lay an egg
+      this.eggAmount = int(random(1, 2));
       this.layX = random(50, 1150); // where to lay eggs
       this.layY = random(550, 750);
     } else {
@@ -450,9 +399,10 @@ class Turtle {
     }
 
     // Slowly decrease lives
-    if (frameCount % 60000 == 0) {
+    if (this.liveCount % 1800 == 0) {
       this.lives -= 1;
     }
+    this.liveCount += 1;
     if (this.lives == 0) {
       this.alive = false;
     }
@@ -508,7 +458,7 @@ class Turtle {
   }
 
   layEgg() {
-    if (frameCount % 60 == 0) {
+    if (frameCount % this.eggTime == 0) {
       this.layingEgg = true;
     }
     if (this.layingEgg) {
@@ -600,6 +550,7 @@ class Shark {
     this.noiseYLoc = random(3000, 4000);
     this.lives = 5;
     this.alive = true;
+    this.liveCount = 1;
   }
 
   display() {
@@ -623,9 +574,10 @@ class Shark {
       hpDistance += 18;
     }
     // Slowly decrease lives
-    if (frameCount % 300 == 0) {
+    if (this.liveCount % 3600 == 0) {
       this.lives -= 1;
     }
+    this.liveCount += 1;
     if (this.lives == 0) {
       this.alive = false;
     }
@@ -715,8 +667,8 @@ class Fish {
     this.caught = false;
     this.caughtX;
     this.caughtY;
-
     this.lives = 5;
+    this.liveCount = 1;
   }
 
   display() {
@@ -752,9 +704,10 @@ class Fish {
       hpDistance += 8;
     }
     // Slowly decrease lives
-    if (frameCount % 300000 == 0) {
+    if (this.liveCount % 3600 == 0) {
       this.lives -= 1;
     }
+    this.liveCount += 1;
     if (this.lives == 0) {
       this.alive = false;
     }
@@ -878,6 +831,7 @@ class Raccoon {
 
     this.lives = 5;
     this.alive = true;
+    this.liveCount = 1;
   }
   display() {
     strokeWeight(1);
@@ -908,9 +862,10 @@ class Raccoon {
       hpDistance += 18;
     }
     // Slowly decrease lives
-    if (frameCount % 300 == 0) {
+    if (this.liveCount % 3600 == 0) {
       this.lives -= 1;
     }
+    this.liveCount += 1;
     if (this.lives == 0) {
       this.alive = false;
     }
@@ -926,11 +881,11 @@ class Raccoon {
       this.x -= moveXAmount;
       this.y += moveYAmount;
     }
-    if (this.x >= 1210) {
+    if (this.x >= 1230) {
       this.x = 11;
       this.direction = "left";
     }
-    if (this.x <= 10) {
+    if (this.x <= -10) {
       this.x = 1200;
       this.direction = "right";
     }
@@ -970,7 +925,7 @@ class Egg {
     this.x = x;
     this.y = y;
     this.isAlive = true;
-    this.bornTime = 60; // after how many frameCount it will become a turtle
+    this.bornTime = int(random(600, 1201)); // after how many frameCount it will become a turtle
     this.birthTime = 1;
   }
   display() {
@@ -984,7 +939,7 @@ class Egg {
   turtleBorn() {
     console.log("IN TURTLE BORN");
     if (this.isAlive) {
-      if (this.birthTime % 300 == 0) {
+      if (this.birthTime % this.bornTime == 0) {
         console.log("BORN");
         turtCount += 1;
         turtles.push(new Turtle(1, this.x, this.y));
