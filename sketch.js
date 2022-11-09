@@ -11,6 +11,9 @@ let turtlePNG;
 let cnv;
 let heart;
 
+let intro;
+let buttonStart;
+
 let raccoon;
 let egg;
 let raccoons = [];
@@ -28,6 +31,10 @@ let recbutton, turtButton, fishbutton, sharkButton;
 
 let d = 0;
 let coinFlag = 0;
+let counter = 0;
+let counterStart = 0;
+
+let startFlag = 0;
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -47,135 +54,176 @@ function preload() {
 
 function setup() {
   //original 1200,800, changing it now to add buttons
-  cnv = createCanvas(1200, 950);
-  cnv.id("p5canvas");
-  cnv.parent("#container");
-  noiseDetail(24);
-
-  // for (let num = 0; num < 2; num++) {
-  //   let tmpRaccoon = new Raccoon();
-  //   raccoons.push(tmpRaccoon);
-  // }
-  let tmpRac = new Raccoon("right");
-  raccoons.push(tmpRac);
-  let tmpRac2 = new Raccoon("left");
-  raccoons.push(tmpRac2);
-  turtleTest = new Turtle();
-  for (let i = 0; i < 20; i++) {
-    turtles.push(new Turtle());
-  }
-  for (let i = 0; i < 10; i++) {
-    fish.push(new Fish());
-  }
-  sharkT = new Shark("right");
-  for (let i = 0; i < 2; i++) {
-    let dir = int(random(2));
-    if (dir == 0) {
-      sharks.push(new Shark("left"));
-    } else {
-      sharks.push(new Shark("right"));
-    }
-  }
-  recbutton = new Buttons("rac", 100, 870, 100);
-  turtButton = new Buttons("turt", 300, 870, 500);
-  sharkButton = new Buttons("shark", 540, 870, 100);
-  fishbutton = new Buttons("fish", 740, 870, 100);
-  buttons.push(recbutton);
-  buttons.push(turtButton);
-  buttons.push(sharkButton);
-  buttons.push(fishbutton);
 }
 
 function draw() {
-  noStroke();
-  image(ocean, 0, 0, 1200, 800);
-  fill(44, 128, 205);
-  //this is a white rec for displaying buttons
-  rect(0, 800, 1200, 150);
-  noFill();
-  rect(10, 10, 1180, 500); // in the ocean
-
-  rect(50, 630, 1100, 130); // places to lay egg
-
-  for (let i = 0; i < turtles.length; i++) {
-    if (turtles[i].alive == false) {
-      turtles.splice(i, 1);
-      i -= 1;
-    } else {
-      turtles[i].display();
-      if (!turtles[i].layingEgg) {
-        turtles[i].move();
+  //====
+  if (counter < 1 || counterStart < 1) {
+    //getItem("startFlag") == null
+    if (startFlag == 0 && counter < 1) {
+      intro = createP(
+        "How To Play<br>To Win: Keep every species alive, not just turtles.<br> You lose if: Any of the species dies out. Meaning you lose if any species die to the population of 0. <br> How to prevent losing: You can use points to buy species to earn more opportunities. And it is your decision on when to buy those species to win the game. You only get 500 coins and the number of coins will not change. <br>The objective: To raise as many turtles as possible. When your system dies, the system will tell you how many turtles you have raised. "
+      );
+      buttonStart = createButton("Click To Start");
+      intro.id("intro");
+      intro.parent("#container");
+      buttonStart.parent("#container");
+      buttonStart.id("buttonStart");
+      counter += 1;
+    } else if (startFlag == 1 && counterStart < 1) {
+      let buttonStartEle = document.getElementById("buttonStart");
+      let introEle = document.getElementById("intro");
+      if (buttonStartEle != null && introEle != null) {
+        buttonStartEle.remove();
+        introEle.remove();
       }
-      if (turtles[i].fecund == true) {
-        turtles[i].layEgg();
+
+      cnv = createCanvas(1200, 950);
+      cnv.id("p5canvas");
+      noiseDetail(24);
+      cnv.parent("#container");
+
+      // for (let num = 0; num < 2; num++) {
+      //   let tmpRaccoon = new Raccoon();
+      //   raccoons.push(tmpRaccoon);
+      // }
+      let tmpRac = new Raccoon("right");
+      raccoons.push(tmpRac);
+      let tmpRac2 = new Raccoon("left");
+      raccoons.push(tmpRac2);
+      turtleTest = new Turtle();
+      for (let i = 0; i < 20; i++) {
+        turtles.push(new Turtle());
       }
+      for (let i = 0; i < 10; i++) {
+        fish.push(new Fish());
+      }
+      sharkT = new Shark("right");
+      for (let i = 0; i < 2; i++) {
+        let dir = int(random(2));
+        if (dir == 0) {
+          sharks.push(new Shark("left"));
+        } else {
+          sharks.push(new Shark("right"));
+        }
+      }
+      recbutton = new Buttons("rac", 100, 870, 100);
+      turtButton = new Buttons("turt", 300, 870, 500);
+      sharkButton = new Buttons("shark", 540, 870, 100);
+      fishbutton = new Buttons("fish", 740, 870, 100);
+      buttons.push(recbutton);
+      buttons.push(turtButton);
+      buttons.push(sharkButton);
+      buttons.push(fishbutton);
+      counterStart += 1;
     }
   }
+  //===
+  if (startFlag == 0) {
+    intro.style("font-family", "Silkscreen");
+    intro.style("font-size", "30px");
+    buttonStart.mousePressed(gameStart);
+  } else if (startFlag == 1) {
+    // let ele = document.getElementById("container");
+    // console.log(ele);
+    // let buttonelement = document.getElementById("buttonStart");
+    // buttonelement.remove();
+    // let introele = document.getElementById("intro");
+    // introele.remove();
+    // ele.removeAttribute("buttonStart");
+    // ele.removeAttribute("intro");
+    noStroke();
 
-  for (let sharki = 0; sharki < sharks.length; sharki++) {
-    sharks[sharki].display();
-    sharks[sharki].move();
-    sharks[sharki].checkTurtle();
-  }
+    image(ocean, 0, 0, 1200, 800);
+    fill(44, 128, 205);
+    //this is a white rec for displaying buttons
+    rect(0, 800, 1200, 150);
+    noFill();
+    rect(10, 10, 1180, 500); // in the ocean
 
-  for (let i = 0; i < fish.length; i++) {
-    fish[i].display();
-    fish[i].move();
-    // if (fish[i].caught) {
-    //   fish[i].beingEat();
+    rect(50, 630, 1100, 130); // places to lay egg
+
+    for (let i = 0; i < turtles.length; i++) {
+      if (turtles[i].alive == false) {
+        turtles.splice(i, 1);
+        i -= 1;
+      } else {
+        turtles[i].display();
+        if (!turtles[i].layingEgg) {
+          turtles[i].move();
+        }
+        if (turtles[i].fecund == true) {
+          turtles[i].layEgg();
+        }
+      }
+    }
+
+    for (let sharki = 0; sharki < sharks.length; sharki++) {
+      sharks[sharki].display();
+      sharks[sharki].move();
+      sharks[sharki].checkTurtle();
+    }
+
+    for (let i = 0; i < fish.length; i++) {
+      fish[i].display();
+      fish[i].move();
+      // if (fish[i].caught) {
+      //   fish[i].beingEat();
+      // }
+      if (fish[i].alive == false) {
+        fish.splice(i, 1);
+        i -= 1;
+      }
+    }
+    // background("grey");
+
+    if (frameCount % 200 == 0) {
+      let tmpRaccoon = new Raccoon();
+      raccoons.push(tmpRaccoon);
+    }
+    // if (frameCount % 400 == 0) {
+    //   let tmpEgg = new Egg();
+    //   eggs.push(tmpEgg);
     // }
-    if (fish[i].alive == false) {
-      fish.splice(i, 1);
-      i -= 1;
+    //console.log(eggs);
+    push();
+    imageMode(CENTER);
+    for (let j = 0; j < eggs.length; j++) {
+      if (eggs[j].isAlive == true) {
+        eggs[j].display();
+      } else if (eggs[j].isAlive == false) {
+        eggs.splice(j, 1);
+        j -= 1;
+      }
     }
-  }
-  // background("grey");
-
-  if (frameCount % 200 == 0) {
-    let tmpRaccoon = new Raccoon();
-    raccoons.push(tmpRaccoon);
-  }
-  // if (frameCount % 400 == 0) {
-  //   let tmpEgg = new Egg();
-  //   eggs.push(tmpEgg);
-  // }
-  //console.log(eggs);
-  push();
-  imageMode(CENTER);
-  for (let j = 0; j < eggs.length; j++) {
-    eggs[j].display();
-    if (eggs[j].isAlive == false) {
-      eggs.splice(j, 1);
-      j -= 1;
+    for (let i = 0; i < raccoons.length; i++) {
+      raccoons[i].display();
+      raccoons[i].move();
+      raccoons[i].checkCollision();
     }
+
+    for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
+      buttons[buttoni].display();
+      buttons[buttoni].checkClick();
+    }
+
+    noStroke();
+
+    strokeWeight(4);
+    fill("black");
+
+    textSize(18);
+    text("100 coins", 50, 930);
+    text("500 coins", 270, 930);
+    text("100 coins", 500, 930);
+    text("100 coins", 700, 930);
+    textSize(22);
+    text("Click the animal to buy", 900, 900);
+    text("Coins Left:  " + coins, 900, 870);
+    pop();
+
+    // console.log(eggs.length);
   }
-  for (let i = 0; i < raccoons.length; i++) {
-    raccoons[i].display();
-    raccoons[i].move();
-    raccoons[i].checkCollision();
-  }
-
-  for (let buttoni = 0; buttoni < buttons.length; buttoni++) {
-    buttons[buttoni].display();
-    buttons[buttoni].checkClick();
-  }
-
-  noStroke();
-
-  strokeWeight(4);
-  fill("black");
-
-  textSize(18);
-  text("100 coins", 50, 930);
-  text("500 coins", 270, 930);
-  text("100 coins", 500, 930);
-  text("100 coins", 700, 930);
-  textSize(22);
-  text("Click the animal to buy", 900, 900);
-  text("Coins Left:  " + coins, 900, 870);
-  pop();
-
-  // console.log(eggs.length);
 }
 class Buttons {
   constructor(type, positionx, positiony, price) {
@@ -713,4 +761,9 @@ class Egg {
     // point(this.x + 5, this.y - 5);
     // rect(this.x - 15, this.y - 15, 30, 30);
   }
+}
+function gameStart() {
+  console.log("hi");
+  startFlag = 1;
+  // storeItem("startFlag", 0);
 }
