@@ -24,6 +24,10 @@ let turtleTest;
 let turtles = [];
 let fish = [];
 let sharks = [];
+
+let flagEnd;
+
+
 let recbutton, turtButton, fishbutton, sharkButton;
 let counter = 0;
 let counterStart = 0;
@@ -31,6 +35,15 @@ let startFlag = 0;
 
 let d = 0;
 let coinFlag = 0;
+
+let racEnd;
+let sharkEnd;
+let fishEnd;
+let turtEnd;
+
+let turtCount = 0;
+let endMessage;
+let counterEnd = 0;
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -51,11 +64,15 @@ function preload() {
 function setup() {}
 
 function draw() {
-  if (counter < 1 || counterStart < 1) {
+
+
+
+  if (counter < 1 || counterStart < 1 || counterEnd < 1) {
+
     //getItem("startFlag") == null
     if (startFlag == 0 && counter < 1) {
       intro = createP(
-        "How To Play<br>To Win: Keep every species alive, not just turtles.<br> You lose if: Any of the species dies out. Meaning you lose if any species die to the population of 0. <br> How to prevent losing: You can use points to buy species to earn more opportunities. And it is your decision on when to buy those species to win the game. You only get 500 coins and the number of coins will not change. <br>The objective: To raise as many turtles as possible. When your system dies, the system will tell you how many turtles you have raised. "
+        "How To Play<br>To Win: Keep every species alive, not just turtles. Raise as many turtles as you can. <br> The game ends if: Any of the species dies out. Meaning you lose if any species die to the population of 0. <br> How to prevent losing: You can use points to buy species to earn more opportunities. And it is your decision on when to buy those species to win the game. You only get 500 coins and the number of coins will not change. <br>The objective: To raise as many turtles as possible. When your system dies, the system will tell you how many turtles you have raised. <br> Rules: Turtles eat fish, sharks eat turtles. Raccoons eat turtles' eggs."
       );
       buttonStart = createButton("Click To Start");
       intro.id("intro");
@@ -63,6 +80,26 @@ function draw() {
       buttonStart.parent("#container");
       buttonStart.id("buttonStart");
       counter += 1;
+    } else if (
+      (turtles.length == 0 ||
+        sharks.length == 0 ||
+        fish.length == 0 ||
+        raccoons.length == 0) &&
+      flagEnd == 1
+    ) {
+      console.log("any dies");
+      endMessage = createP(
+        "The game is over, thank you for raising the turtles. <br>The total amount of turtles you have raised during this game is: " +
+          turtCount
+      );
+      endMessage.id("end");
+      endMessage.parent("container");
+      let p5canvas = document.getElementById("p5canvas");
+
+      if (p5canvas != null) {
+        p5canvas.remove();
+      }
+      counterEnd += 1;
     } else if (startFlag == 1 && counterStart < 1) {
       let buttonStartEle = document.getElementById("buttonStart");
       let introEle = document.getElementById("intro");
@@ -72,6 +109,7 @@ function draw() {
       }
 
       cnv = createCanvas(1200, 950);
+      flagEnd = 1;
       cnv.id("p5canvas");
       noiseDetail(24);
       cnv.parent("#container");
@@ -84,9 +122,11 @@ function draw() {
       //     raccoons.push(new Raccoon("left"));
       //   }
       // }
+
       raccoons.push(new Raccoon("left"));
       raccoons.push(new Raccoon("right"));
       for (let i = 0; i < 5; i++) {
+
         turtles.push(new Turtle(0));
       }
       for (let i = 0; i < 10; i++) {
@@ -114,8 +154,8 @@ function draw() {
   }
   //===
   if (startFlag == 0) {
-    intro.style("font-family", "Silkscreen");
-    intro.style("font-size", "30px");
+    // intro.style("font-family", "Silkscreen");
+    // intro.style("font-size", "30px");
     buttonStart.mousePressed(gameStart);
   } else if (startFlag == 1) {
     oldDraw();
@@ -134,7 +174,38 @@ function oldDraw() {
   // stroke("red");
   // strokeWeight(5);
   rect(50, 550, 1100, 200); // places to lay egg
-
+  for (let i = 0; i < turtles.length; i++) {
+    if (turtles[i].alive == true) {
+      turtEnd = 1;
+    } else {
+      turtEnd = 0;
+    }
+  }
+  for (let i = 0; i < fish.length; i++) {
+    if (fish[i].alive == true) {
+      fishEnd = 1;
+    } else {
+      fishEnd = 0;
+    }
+  }
+  for (let i = 0; i < raccoons.length; i++) {
+    if (raccoons[i].alive == true) {
+      racEnd = 1;
+    } else {
+      racEnd = 0;
+    }
+  }
+  for (let i = 0; i < sharks.length; i++) {
+    if (sharks[i].alive == true) {
+      sharkEnd = 1;
+    } else {
+      sharkEnd = 0;
+    }
+  }
+  // if (turtEnd == 0) {
+  //   fill("grey");
+  //   rect(0, 0, 1200, 950);
+  // }
   for (let i = 0; i < turtles.length; i++) {
     if (turtles[i].alive == false) {
       turtles.splice(i, 1);
@@ -257,7 +328,8 @@ class Buttons {
         coins -= this.price;
         if (this.type == "turt") {
           console.log("what");
-          let turtBut = new Turtle();
+          turtCount += 1;
+          let turtBut = new Turtle(0);
           turtles.push(turtBut);
         } else if (this.type == "rac") {
           let racBut = new Raccoon("right");
@@ -335,11 +407,11 @@ class Turtle {
       this.alive = false;
     }
 
-    strokeWeight(1);
-    rect(this.x + 25, this.y + 10, 30, 30);
-    stroke("purple");
-    strokeWeight(10);
-    point(this.x + 40, this.y + 30);
+    // strokeWeight(1);
+    // rect(this.x + 25, this.y + 10, 30, 30);
+    // stroke("purple");
+    // strokeWeight(10);
+    // point(this.x + 40, this.y + 30);
   }
 
   move() {
@@ -484,16 +556,16 @@ class Shark {
   display() {
     if (this.d == "right") {
       image(sharkR, this.x, this.y, 150, 75);
-      stroke("red");
-      strokeWeight(2);
-      point(this.x + 130, this.y + 40);
-      rect(this.x + 100, this.y + 10, 60, 60);
+      // stroke("red");
+      // strokeWeight(2);
+      // point(this.x + 130, this.y + 40);
+      // rect(this.x + 100, this.y + 10, 60, 60);
     } else if (this.d == "left") {
       image(sharkL, this.x, this.y, 150, 75);
-      stroke("red");
-      strokeWeight(10);
-      // rect(this.x + 15, this.y - 35, 50, 50);
-      point(this.x + 45, this.y + 45);
+      // stroke("red");
+      // strokeWeight(10);
+      // // rect(this.x + 15, this.y - 35, 50, 50);
+      // point(this.x + 45, this.y + 45);
     }
 
     let hpDistance = 0;
@@ -869,6 +941,7 @@ class Egg {
     if (this.isAlive) {
       if (this.birthTime % this.bornTime == 0) {
         console.log("BORN");
+        turtCount += 1;
         turtles.push(new Turtle(1, this.x, this.y));
         this.isAlive = false;
       }
