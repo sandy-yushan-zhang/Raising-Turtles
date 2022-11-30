@@ -44,6 +44,13 @@ let turtCount = 0;
 let endMessage;
 let counterEnd = 0;
 let tmpV = 0;
+
+let swimD, swimL, swimR, swimU;
+
+let groundL, groundR;
+
+let myPerson;
+let personSpeed = 3;
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -59,6 +66,14 @@ function preload() {
   raccoonRight = loadImage("images/racRight.png");
   egg = loadImage("images/egg.png");
   heart = loadImage("images/heart.png");
+
+  swimD = loadImage("images/swimD.png");
+  swimL = loadImage("images/swimL.png");
+  swimR = loadImage("images/swimR.png");
+  swimU = loadImage("images/swimU.png");
+
+  groundL = loadImage("images/groundL.png");
+  groundR = loadImage("images/groundR.png");
 }
 
 function setup() {}
@@ -140,11 +155,14 @@ function draw() {
       turtButton = new Buttons("turt", 300, 870, 500);
       sharkButton = new Buttons("shark", 540, 870, 100);
       fishbutton = new Buttons("fish", 740, 870, 100);
+
       buttons.push(recbutton);
       buttons.push(turtButton);
       buttons.push(sharkButton);
       buttons.push(fishbutton);
       counterStart += 1;
+
+      myPerson = new Person("right");
     }
   }
   //===
@@ -272,7 +290,35 @@ function oldDraw() {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
-
+  push();
+  imageMode(CENTER);
+  myPerson.display();
+  if (keyIsDown(83) && myPerson.y < 750) {
+    //down
+    myPerson.d = "down";
+    myPerson.y += personSpeed;
+  }
+  if (keyIsDown(87) && myPerson.y > 50) {
+    //up
+    myPerson.d = "up";
+    myPerson.y -= personSpeed;
+  }
+  if (keyIsDown(65) && myPerson.x > 50) {
+    //move right
+    myPerson.d = "left";
+    myPerson.x -= personSpeed;
+  }
+  if (keyIsDown(68) && myPerson.x < 1150) {
+    //move right
+    myPerson.d = "right";
+    myPerson.x += personSpeed;
+  }
+  if (myPerson.y < 525) {
+    myPerson.state = "swim";
+  } else if (myPerson.y >= 500) {
+    myPerson.state = "walk";
+  }
+  pop();
   noStroke();
 
   strokeWeight(4);
@@ -527,6 +573,37 @@ class Turtle {
           this.layX = random(50, 1150); // reset so next time lay at a different place
           this.layY = random(630, 760);
         }
+      }
+    }
+  }
+}
+class Person {
+  constructor(d) {
+    this.d = d;
+    this.state = "walk";
+    this.x = 400;
+    this.y = 600;
+  }
+  display() {
+    if (this.state == "walk") {
+      if (this.d == "right") {
+        image(groundR, this.x, this.y, 200, 150);
+      } else if (this.d == "left") {
+        image(groundL, this.x, this.y, 50, 120);
+      } else {
+        image(groundL, this.x, this.y, 50, 120);
+      }
+    } else if (this.state == "swim") {
+      if (this.d == "up") {
+        image(swimU, this.x, this.y, 100, 100);
+      } else if (this.d == "down") {
+        image(swimD, this.x, this.y, 100, 100);
+      }
+      if (this.d == "left") {
+        image(swimL, this.x, this.y, 100, 100);
+      }
+      if (this.d == "right") {
+        image(swimR, this.x, this.y, 100, 100);
       }
     }
   }
