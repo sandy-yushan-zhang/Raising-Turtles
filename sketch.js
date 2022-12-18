@@ -52,6 +52,19 @@ let groundL, groundR;
 let myPerson;
 let personSpeed = 3;
 let walkFlag = 1; // 1 is left
+
+// HAMMER GAME ----------------------
+var holes = [];
+var rac, hammer;
+var score = 0;
+var timerValue = 20;
+var gameOver = false;
+var hammerEnd = 0;
+var hammerStart = 0;
+var hammerIntro;
+var hammerRealStart = false;
+var hammerEndMessage;
+
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -75,6 +88,10 @@ function preload() {
 
   groundL = loadImage("images/walkleft.gif");
   groundR = loadImage("images/walkright.gif");
+
+  // HAMMER GAME -----------
+  rac = loadImage("images/jump0001.png");
+  hammer = loadImage("images/hammer.png");
 }
 
 function setup() {}
@@ -119,7 +136,7 @@ function draw() {
         p5canvas.remove();
       }
       counterEnd += 1;
-    } else if (startFlag == 1 && counterStart < 1) {
+    } else if ((startFlag == 1 || startFlag == 2) && counterStart < 1) {
       let buttonStartEle = document.getElementById("buttonStart");
       let introEle = document.getElementById("intro");
       if (buttonStartEle != null && introEle != null) {
@@ -171,6 +188,14 @@ function draw() {
       counterStart += 1;
 
       myPerson = new Person("right");
+
+      // HAMMER GAME --------------
+      for (let i = 800 / 2 - 200; i < 800; i += 230) {
+        for (let j = 1200 / 2 - 330; j < 1200; j += 330) {
+          let hole = new Hole(j, i);
+          holes.push(hole);
+        }
+      }
     }
   }
   //===
@@ -180,6 +205,8 @@ function draw() {
     buttonStart.mousePressed(gameStart);
   } else if (startFlag == 1) {
     oldDraw();
+  } else if (startFlag == 2) {
+    hammerGame();
   }
 }
 
@@ -265,17 +292,6 @@ function oldDraw() {
       i -= 1;
     }
   }
-  // background("grey");
-
-  // if (frameCount % 200 == 0) {
-  //   let tmpRaccoon = new Raccoon();
-  //   raccoons.push(tmpRaccoon);
-  // }
-  // if (frameCount % 400 == 0) {
-  //   let tmpEgg = new Egg();
-  //   eggs.push(tmpEgg);
-  // }
-  //console.log(eggs);
   push();
   imageMode(CENTER);
   for (let j = 0; j < eggs.length; j++) {
@@ -350,7 +366,92 @@ function oldDraw() {
   text("Click the animal to buy", 900, 900);
   text("Coins Left:  " + coins, 900, 870);
 
-  // console.log(eggs.length);
+  // TRIGGER HAMMER GAME
+  if (myPerson.x == 1150 && myPerson.y == 750 && !gameOver) {
+    startFlag = 2;
+  }
+}
+
+function hammerGame() {
+  image(ocean, 0, 0, 1200, 800);
+
+  if (hammerStart <= 120) {
+    hammerIntro = createElement(
+      "h1",
+      "Welcome to Whack-A-Raccoon!<br>You have 20 seconds.<br>Each Score = 50 Coins<br><br>Ready... GO!"
+    );
+    hammerIntro.id("hammerIntro");
+    hammerIntro.parent("#container");
+    hammerIntro.position(175, 300);
+    hammerStart++;
+  } else {
+    let hammerIntroEle = document.getElementById("hammerIntro");
+    if (hammerIntroEle != null) {
+      hammerIntroEle.remove();
+    }
+    hammerStart++;
+    if (hammerStart >= 300) {
+      hammerRealStart = true;
+    }
+
+    if (hammerRealStart) {
+      noStroke();
+      fill("black");
+      textSize(40);
+      text("Score: ", 40, 100);
+      text(score, 180, 100);
+      // TIMER
+      if (frameCount % 60 == 0 && timerValue > 0) {
+        timerValue--;
+      }
+      if (timerValue == 0) {
+        gameOver = true;
+      }
+      text("Time Left:", 800, 100);
+      if (timerValue >= 10) {
+        text("0:" + timerValue, 1000, 100);
+      } else if (timerValue < 10) {
+        text("0:0" + timerValue, 1000, 100);
+      }
+
+      if (!gameOver) {
+        // ALL HOLES
+        holes.forEach(function (each) {
+          each.display();
+          each.rac();
+        });
+
+        // HAMMER
+        if (mouseY <= 750) {
+          image(hammer, mouseX - 30, mouseY - 50, 200, 100);
+        }
+
+        // RACCOON APPEAR RANDOMLY
+        if (frameCount % 60 == 0) {
+          let i = int(random(9));
+          holes.forEach(function (each) {
+            each.racAppear = false;
+          });
+          holes[i].racAppear = true;
+        }
+      } else {
+        holes.forEach(function (each) {
+          each.racAppear = false;
+        });
+        hammerEndMessage = createElement("h1", "GAME OVER");
+        hammerEndMessage.id("hammerIntro");
+        hammerEndMessage.parent("#container");
+        hammerEndMessage.position(570, 400);
+
+        hammerEnd += 1;
+      }
+      if (hammerEnd >= 240) {
+        hammerEndMessage.remove();
+        coins += score * 50;
+        startFlag = 1;
+      }
+    }
+  }
 }
 
 class Buttons {
@@ -593,6 +694,7 @@ class Turtle {
     }
   }
 }
+
 class Person {
   constructor(d) {
     this.d = d;
@@ -1094,4 +1196,52 @@ function gameStart() {
   console.log("hi");
   startFlag = 1;
   // storeItem("startFlag", 0);
+}
+
+class Hole {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.size = 120;
+    this.racAppear = false;
+  }
+
+  display() {
+    strokeWeight(25);
+    stroke(234, 120, 0);
+    noFill();
+    ellipse(this.x, this.y, this.size, this.size);
+  }
+
+  rac() {
+    if (this.racAppear == true) {
+      image(rac, this.x - 150, this.y - 120, 250, 250);
+      stroke("red");
+      strokeWeight(5);
+      // rect(this.x - 30, this.y - 65, 70, 120);
+      // let d = dist(this.x, mouseY, this.x, this.y);
+      // text(d, 400, 400);
+      // left: 30, right: 35
+      // up: 60, down: 55
+    }
+  }
+
+  checkHitRac() {
+    if (dist(mouseX, this.y, this.x, this.y) <= 30) {
+      if (dist(this.x, mouseY, this.x, this.y) <= 55) {
+        if (this.racAppear) {
+          this.racAppear = false;
+          score += 1;
+        }
+      }
+    }
+  }
+}
+
+function mouseClicked() {
+  if (!gameOver) {
+    holes.forEach(function (each) {
+      each.checkHitRac();
+    });
+  }
 }
