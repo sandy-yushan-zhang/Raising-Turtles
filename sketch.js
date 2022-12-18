@@ -67,18 +67,25 @@ function preload() {
   egg = loadImage("images/egg.png");
   heart = loadImage("images/heart.png");
 
-  swimD = loadImage("images/swimD.png");
-  swimL = loadImage("images/swimL.png");
-  swimR = loadImage("images/swimR.png");
-  swimU = loadImage("images/swimU.png");
+  swimD = loadImage("images/swimD.gif");
+  swimL = loadImage("images/swimL.gif");
+  swimR = loadImage("images/swimR.gif");
+  swimU = loadImage("images/swimU.gif");
 
-  groundL = loadImage("images/groundL.png");
-  groundR = loadImage("images/groundR.png");
+  groundL = loadImage("images/walkleft.gif");
+  groundR = loadImage("images/walkright.gif");
 }
 
 function setup() {}
 
 function draw() {
+  // swimD.setFrame(0);
+  // swimR.setFrame(0);
+  // swimL.setFrame(0);
+  // swimU.setFrame(0);
+
+  // groundL.setFrame(0);
+  // groundR.setFrame(0);
   if (counter < 1 || counterStart < 1 || counterEnd < 1) {
     //getItem("startFlag") == null
     if (startFlag == 0 && counter < 1) {
@@ -178,6 +185,8 @@ function draw() {
 function oldDraw() {
   noStroke();
   image(ocean, 0, 0, 1200, 800);
+  // groundR.delay(1000);
+  // groundL.delay(1000);
   fill(44, 128, 205);
   //this is a white rec for displaying buttons
   rect(0, 800, 1200, 150);
@@ -290,8 +299,13 @@ function oldDraw() {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
-  push();
   imageMode(CENTER);
+  // swimD.play();
+  // swimL.play();
+  // swimR.play();
+  // swimU.play();
+  // groundL.play();
+  // groundR.play();
   myPerson.display();
   if (keyIsDown(83) && myPerson.y < 750) {
     //down
@@ -332,7 +346,6 @@ function oldDraw() {
   textSize(22);
   text("Click the animal to buy", 900, 900);
   text("Coins Left:  " + coins, 900, 870);
-  pop();
 
   // console.log(eggs.length);
 }
@@ -583,27 +596,70 @@ class Person {
     this.state = "walk";
     this.x = 400;
     this.y = 600;
+    this.currentFrame = 0;
+    this.currentFrame1 = 0;
+    this.currentFrame2 = 0;
+    this.currentFrame3 = 0;
+    this.currentFrame4 = 0;
+    this.currentFrame5 = 0;
   }
   display() {
     if (this.state == "walk") {
+      console.log(groundR.numFrames());
       if (this.d == "right") {
-        image(groundR, this.x, this.y, 200, 150);
+        groundR.setFrame(this.currentFrame);
+        this.currentFrame += 1;
+        if (this.currentFrame > groundR.numFrames() - 1) {
+          this.currentFrame = 0;
+        }
+        image(groundR, this.x, this.y, 150, 150);
       } else if (this.d == "left") {
-        image(groundL, this.x, this.y, 50, 120);
+        groundL.setFrame(this.currentFrame1);
+        this.currentFrame1 += 1;
+        if (this.currentFrame1 > groundL.numFrames() - 1) {
+          this.currentFrame1 = 0;
+        }
+        image(groundL, this.x, this.y, 160, 150);
       } else {
-        image(groundL, this.x, this.y, 50, 120);
+        groundL.setFrame(this.currentFrame1);
+        this.currentFrame1 += 1;
+        if (this.currentFrame1 > groundL.numFrames() - 1) {
+          this.currentFrame1 = 0;
+        }
+        image(groundL, this.x, this.y, 160, 150);
       }
     } else if (this.state == "swim") {
+      console.log(swimU.numFrames());
       if (this.d == "up") {
-        image(swimU, this.x, this.y, 100, 100);
+        swimU.setFrame(this.currentFrame2);
+        this.currentFrame2 += 1;
+        if (this.currentFrame2 > swimU.numFrames() - 1) {
+          this.currentFrame2 = 0;
+        }
+        image(swimU, this.x, this.y, 170, 170);
       } else if (this.d == "down") {
-        image(swimD, this.x, this.y, 100, 100);
+        swimD.setFrame(this.currentFrame3);
+        this.currentFrame3 += 1;
+        if (this.currentFrame3 > swimD.numFrames() - 1) {
+          this.currentFrame3 = 0;
+        }
+        image(swimD, this.x, this.y, 170, 170);
       }
       if (this.d == "left") {
-        image(swimL, this.x, this.y, 100, 100);
+        swimL.setFrame(this.currentFrame4);
+        this.currentFrame4 += 1;
+        if (this.currentFrame4 > swimL.numFrames() - 1) {
+          this.currentFrame4 = 0;
+        }
+        image(swimL, this.x, this.y, 170, 170);
       }
       if (this.d == "right") {
-        image(swimR, this.x, this.y, 100, 100);
+        swimR.setFrame(this.currentFrame5);
+        this.currentFrame5 += 1;
+        if (this.currentFrame5 > swimR.numFrames() - 1) {
+          this.currentFrame5 = 0;
+        }
+        image(swimR, this.x, this.y, 170, 170);
       }
     }
   }
