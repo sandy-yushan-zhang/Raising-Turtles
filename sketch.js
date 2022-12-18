@@ -51,6 +51,7 @@ let groundL, groundR;
 
 let myPerson;
 let personSpeed = 3;
+let walkFlag = 1; // 1 is left
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -320,11 +321,13 @@ function oldDraw() {
   if (keyIsDown(65) && myPerson.x > 50) {
     //move right
     myPerson.d = "left";
+    walkFlag = 1;
     myPerson.x -= personSpeed;
   }
   if (keyIsDown(68) && myPerson.x < 1150) {
     //move right
     myPerson.d = "right";
+    walkFlag = 0;
     myPerson.x += personSpeed;
   }
   if (myPerson.y < 525) {
@@ -621,12 +624,21 @@ class Person {
         }
         image(groundL, this.x, this.y, 160, 150);
       } else {
-        groundL.setFrame(this.currentFrame1);
-        this.currentFrame1 += 1;
-        if (this.currentFrame1 > groundL.numFrames() - 1) {
-          this.currentFrame1 = 0;
+        if (walkFlag == 1) {
+          groundL.setFrame(this.currentFrame1);
+          this.currentFrame1 += 1;
+          if (this.currentFrame1 > groundL.numFrames() - 1) {
+            this.currentFrame1 = 0;
+          }
+          image(groundL, this.x, this.y, 160, 150);
+        } else if (walkFlag == 0) {
+          groundR.setFrame(this.currentFrame);
+          this.currentFrame += 1;
+          if (this.currentFrame > groundR.numFrames() - 1) {
+            this.currentFrame = 0;
+          }
+          image(groundR, this.x, this.y, 150, 150);
         }
-        image(groundL, this.x, this.y, 160, 150);
       }
     } else if (this.state == "swim") {
       console.log(swimU.numFrames());
