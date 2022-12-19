@@ -1282,7 +1282,7 @@ class Fish {
 class ARegg {
   build() {
     this.isAlive = true;
-    this.x = random(40, width - 40);
+    this.x = random(40, 1000);
     this.y = random(40, 660);
   }
   display() {
@@ -1370,8 +1370,8 @@ class Raccoon {
     if (this.y <= 30) {
       this.y = 30;
     }
-    if (this.y >= 600) {
-      this.y = 600;
+    if (this.y >= 670) {
+      this.y = 670;
     }
     this.noiseXLoc += 0.01;
     this.noiseYLoc += 0.01;
