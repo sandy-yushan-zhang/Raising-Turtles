@@ -19,7 +19,7 @@ let raccoons = [];
 let eggs = [];
 let buttons = [];
 let raccoonRight;
-let coins = 500;
+let coins = 0;
 let turtleTest;
 let turtles = [];
 let fish = [];
@@ -49,6 +49,7 @@ let swimD, swimL, swimR, swimU;
 
 let groundL, groundR;
 
+// let groundLgif, grundRgif, swimDgif, swimLgif, swimRgif, swimUgif
 let myPerson;
 let personSpeed = 3;
 let walkFlag = 1; // 1 is left
@@ -64,6 +65,36 @@ var hammerStart = 0;
 var hammerIntro;
 var hammerRealStart = false;
 var hammerEndMessage;
+
+//AR GAME ------------------
+let capture;
+let currentTime = 0;
+let poseNet;
+
+let poses = [];
+let readyToGo = false;
+let arcion = 0;
+let points = 0;
+let classifier;
+// let cnv;
+let imageModelURL =
+  "https://teachablemachine.withgoogle.com/models/YtGUOOj2rl/";
+let video;
+let flippedVideo;
+let tmpi = 0;
+// To store the classification
+let label = "";
+
+let arRacs = [];
+let racAR1, racAR2, racAR3, racAR4, racAR5, racAR6;
+
+let arEggs = [];
+let arInstruction;
+let timeLimit = 60; // around 60 seconds
+let tmpTime;
+let realCurrTime = 0;
+let countDown;
+let tmpCount = 0;
 
 function preload() {
   ocean = loadImage("images/eco.png");
@@ -92,9 +123,59 @@ function preload() {
   // HAMMER GAME -----------
   rac = loadImage("images/jump0001.png");
   hammer = loadImage("images/hammer.png");
+
+  // AR GAME ----------
+  raccoon = loadImage("images/jump0001.png");
+  raccoonRight = loadImage("images/racRight.png");
+  egg = loadImage("images/egg.png");
+  classifier = ml5.imageClassifier(imageModelURL + "model.json");
 }
 
-function setup() {}
+function setup() {
+  capture = createCapture(VIDEO);
+  capture.size(1200, 800);
+
+  poseNet = ml5.poseNet(capture, modelReady);
+
+  poseNet.on("pose", function (results) {
+    poses = results;
+  });
+  capture.hide();
+  for (let num = 0; num < 10; num++) {
+    let tmpEgg = new ARegg();
+    tmpEgg.build();
+    arEggs.push(tmpEgg);
+  }
+  // FOR draw
+  racAR1 = new Raccoon("right");
+  racAR2 = new Raccoon("left");
+  racAR3 = new Raccoon("right");
+  racAR4 = new Raccoon("left");
+  racAR5 = new Raccoon("right");
+  racAR6 = new Raccoon("left");
+
+  racAR1.y = 100;
+  racAR2.y = 100;
+  racAR3.y = 300;
+  racAR4.y = 300;
+  racAR5.y = 500;
+  racAR6.y = 500;
+  racAR1.arFlag = 1;
+  racAR2.arFlag = 1;
+  racAR3.arFlag = 1;
+  racAR4.arFlag = 1;
+  racAR5.arFlag = 1;
+  racAR6.arFlag = 1;
+
+  arRacs.push(racAR1);
+  arRacs.push(racAR2);
+  arRacs.push(racAR3);
+  arRacs.push(racAR4);
+  arRacs.push(racAR5);
+  arRacs.push(racAR6);
+
+  classifyVideo();
+}
 
 function draw() {
   // swimD.setFrame(0);
@@ -136,14 +217,16 @@ function draw() {
         p5canvas.remove();
       }
       counterEnd += 1;
-    } else if ((startFlag == 1 || startFlag == 2) && counterStart < 1) {
+    } else if (
+      (startFlag == 1 || startFlag == 2 || startFlag == 3) &&
+      counterStart < 1
+    ) {
       let buttonStartEle = document.getElementById("buttonStart");
       let introEle = document.getElementById("intro");
       if (buttonStartEle != null && introEle != null) {
         buttonStartEle.remove();
         introEle.remove();
       }
-
       cnv = createCanvas(1200, 950);
       flagEnd = 1;
       cnv.id("p5canvas");
@@ -196,6 +279,7 @@ function draw() {
           holes.push(hole);
         }
       }
+      // SET UP FOR AR GAME
     }
   }
   //===
@@ -207,11 +291,16 @@ function draw() {
     oldDraw();
   } else if (startFlag == 2) {
     hammerGame();
+  } else if (startFlag == 3) {
+    ARgame();
   }
 }
 
 function oldDraw() {
+  // console.log("GAME", startFlag);
   noStroke();
+  background(0);
+  imageMode(CORNER);
   image(ocean, 0, 0, 1200, 800);
   // groundR.delay(1000);
   // groundL.delay(1000);
@@ -316,6 +405,8 @@ function oldDraw() {
     buttons[buttoni].display();
     buttons[buttoni].checkClick();
   }
+  pop();
+  push();
   imageMode(CENTER);
   // swimD.play();
   // swimL.play();
@@ -324,7 +415,7 @@ function oldDraw() {
   // groundL.play();
   // groundR.play();
   myPerson.display();
-  if (keyIsDown(83) && myPerson.y < 750) {
+  if (keyIsDown(83) && myPerson.y < 730) {
     //down
     myPerson.d = "down";
     myPerson.y += personSpeed;
@@ -370,8 +461,141 @@ function oldDraw() {
   if (myPerson.x == 1150 && myPerson.y == 750 && !gameOver) {
     startFlag = 2;
   }
+
+  //TRIGGER AR GAME
+  if (myPerson.x <= 250 && myPerson.y >= 650 && !gameOver) {
+    startFlag = 3;
+  }
 }
 
+//AR GAME FUNCTIONS =======
+function modelReady() {
+  readyToGo = true;
+}
+function classifyVideo() {
+  flippedVideo = ml5.flipImage(capture);
+  classifier.classify(flippedVideo, gotResult);
+}
+
+function gotResult(error, results) {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  // console.log(results);
+  label = results[0].label;
+  console.log("label", label);
+  // classifyVideo();
+}
+function ARgame() {
+  background(0);
+  imageMode(CORNER);
+  // image(capture, 0, 0, 1200, 800);
+
+  if (readyToGo) {
+    image(capture, 0, 0, 1200, 800);
+
+    fill(255, 255, 0);
+
+    if (poses.length > 0 && poses[0].pose.nose) {
+      let noseX = poses[0].pose.nose.x;
+      let noseY = poses[0].pose.nose.y;
+
+      fill(0, 0, 255);
+      ellipse(noseX, noseY, 50, 50);
+      for (let num1 = 0; num1 < arRacs.length; num1++) {
+        if (dist(noseX, noseY, arRacs[num1].x, arRacs[num1].y) < 40) {
+          if (arRacs[num1].direction == "right") {
+            arRacs[num1].x += random(30, 60);
+            arRacs[num1].y += random(-10, 10);
+          } else if (arRacs[num1].direction == "left") {
+            arRacs[num1].x -= random(50, 90);
+            arRacs[num1].y += random(-20, 20);
+          }
+        }
+      }
+    }
+
+    // arInstruction.position(10, 830);
+    fill(255, 255, 255);
+    currentTime += 1;
+    if (currentTime % 60 == 0) {
+      realCurrTime += 1;
+    }
+    textSize(18);
+    tmpTime = timeLimit - realCurrTime;
+    if (tmpTime < 0) {
+      tmpTime = 0;
+    }
+    text("TIME LEFT:" + tmpTime, 10, 20);
+    console.log("num", arEggs.length);
+
+    if (tmpTime <= 0) {
+      tmpTime = 0;
+      if (arEggs.length > 0) {
+        arRacs = [];
+        textSize(38);
+        if (arcion == 0) {
+          coins += 50;
+          arcion = 1;
+        }
+        tmpCount += 1;
+        text("GAME OVER! YOU WON 50 COINS!", 400, height / 2);
+      } else if (arEggs.length <= 0) {
+        arEggs = [];
+        arRacs = [];
+        textSize(38);
+        tmpCount += 1;
+        text("GAME OVER! YOU LOST!", 450, height / 2);
+      }
+      if (tmpCount >= 100) {
+        arEggs = [];
+        arRacs = [];
+        clear();
+        capture.remove();
+        arInstruction.remove();
+        myPerson.x = 800;
+        myPerson.y = 550;
+        startFlag = 1;
+      }
+    }
+    push();
+    imageMode(CENTER);
+    for (let j = 0; j < arEggs.length; j++) {
+      if (arEggs[j].isAlive == false) {
+        arEggs.splice(j, 1);
+        j -= 1;
+      } else if (arEggs[j].isAlive == true) {
+        arEggs[j].display();
+      }
+    }
+    for (let i = 0; i < arRacs.length; i++) {
+      arRacs[i].display();
+      arRacs[i].moveAR();
+      arRacs[i].checkCollisionAR();
+      // arRacs[i].checkCollision();
+      // if (arRacs[i].alive == false) {
+      //   arRacs.splice(i, 1);
+      //   i -= 1;
+      // }
+    }
+
+    if (tmpi == 0) {
+      arInstruction = createElement(
+        "p",
+        "For around 60 seconds, avoid the raccons to eat all the eggs by using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds, you get 50 coins!"
+      );
+
+      arInstruction.parent("#arins");
+      tmpi += 1;
+    }
+  } else {
+    textSize(50);
+    textAlign(CENTER);
+    fill(255);
+    text("Video Loading", width / 2, height / 2);
+  }
+}
 function hammerGame() {
   image(ocean, 0, 0, 1200, 800);
 
@@ -699,8 +923,8 @@ class Person {
   constructor(d) {
     this.d = d;
     this.state = "walk";
-    this.x = 400;
-    this.y = 600;
+    this.x = 800;
+    this.y = 550;
     this.currentFrame = 0;
     this.currentFrame1 = 0;
     this.currentFrame2 = 0;
@@ -710,7 +934,6 @@ class Person {
   }
   display() {
     if (this.state == "walk") {
-      console.log(groundR.numFrames());
       if (this.d == "right") {
         groundR.setFrame(this.currentFrame);
         this.currentFrame += 1;
@@ -1056,21 +1279,32 @@ class Fish {
   // }
 }
 
+class ARegg {
+  build() {
+    this.isAlive = true;
+    this.x = random(40, width - 40);
+    this.y = random(40, 660);
+  }
+  display() {
+    image(egg, this.x, this.y, 30, 30);
+  }
+}
 class Raccoon {
   constructor(direction) {
     this.direction = direction;
+    // NEW NEW
 
     this.noiseXLoc = random(2000, 3000);
     this.noiseYLoc = random(3000, 4000);
 
     if (this.direction == "left") {
-      this.x = 11;
       this.y = 600;
+      this.x = 11;
     } else if (this.direction == "right") {
       this.x = 1200;
       this.y = 600;
     }
-
+    this.arFlag = 0;
     this.lives = 5;
     this.alive = true;
     this.liveCount = 1;
@@ -1091,27 +1325,58 @@ class Raccoon {
       // strokeWeight(10);
       // point(this.x - 40, this.y - 10);
     }
+    if (this.arFlag == 0) {
+      let hpDistance = 0;
+      let hpXPos;
+      if (this.direction == "right") {
+        hpXPos = -62;
+      } else if (this.direction == "left") {
+        hpXPos = -11;
+      }
 
-    let hpDistance = 0;
-    let hpXPos;
-    if (this.direction == "right") {
-      hpXPos = -62;
-    } else if (this.direction == "left") {
-      hpXPos = -11;
+      for (let i = 0; i < this.lives; i++) {
+        image(heart, this.x + hpXPos + hpDistance, this.y - 80, 9, 9);
+        hpDistance += 18;
+      }
+      // Slowly decrease lives
+      if (this.liveCount % 3600 == 0) {
+        this.lives -= 1;
+      }
+      this.liveCount += 1;
     }
-    for (let i = 0; i < this.lives; i++) {
-      image(heart, this.x + hpXPos + hpDistance, this.y - 80, 9, 9);
-      hpDistance += 18;
-    }
-    // Slowly decrease lives
-    if (this.liveCount % 3600 == 0) {
-      this.lives -= 1;
-    }
-    this.liveCount += 1;
     if (this.lives == 0) {
       this.alive = false;
     }
   }
+  moveAR() {
+    let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 2, 4);
+    let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -4, 5);
+    //this.y = constrain(this.y, 550, 720);
+    if (this.direction == "left") {
+      this.x += moveXAmount;
+      this.y += moveYAmount;
+    } else if (this.direction == "right") {
+      this.x -= moveXAmount;
+      this.y += moveYAmount;
+    }
+    if (this.x >= 1230) {
+      this.x = 11;
+      this.direction = "left";
+    }
+    if (this.x <= -100) {
+      this.x = 1200;
+      this.direction = "right";
+    }
+    if (this.y <= 30) {
+      this.y = 30;
+    }
+    if (this.y >= 600) {
+      this.y = 600;
+    }
+    this.noiseXLoc += 0.01;
+    this.noiseYLoc += 0.01;
+  }
+
   move() {
     let moveXAmount = map(noise(this.noiseXLoc), 0, 1, 0.2, 1.2);
     let moveYAmount = map(noise(this.noiseYLoc), 0, 1, -1, 1);
@@ -1139,6 +1404,22 @@ class Raccoon {
     }
     this.noiseXLoc += 0.01;
     this.noiseYLoc += 0.01;
+  }
+  checkCollisionAR() {
+    for (let n = 0; n < arEggs.length; n++) {
+      let disA;
+      //different mouth directoins
+      if (this.direction == "right") {
+        disA = dist(this.x - 40, this.y - 10, arEggs[n].x + 3, arEggs[n].y - 5);
+      } else if (this.direction == "left") {
+        disA = dist(this.x + 40, this.y - 10, arEggs[n].x + 3, arEggs[n].y - 5);
+      }
+
+      if (disA <= 40) {
+        // console.log(disA);
+        arEggs[n].isAlive = false;
+      }
+    }
   }
   checkCollision() {
     for (let n = 0; n < eggs.length; n++) {
