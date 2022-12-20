@@ -49,6 +49,7 @@ let swimD, swimL, swimR, swimU;
 
 let groundL, groundR;
 
+let streetSign;
 // let groundLgif, grundRgif, swimDgif, swimLgif, swimRgif, swimUgif
 let myPerson;
 let personSpeed = 3;
@@ -77,8 +78,7 @@ let arcion = 0;
 let points = 0;
 let classifier;
 // let cnv;
-let imageModelURL =
-  "https://teachablemachine.withgoogle.com/models/YtGUOOj2rl/";
+let imageModelURL = "https://teachablemachine.withgoogle.com/models/gWHirOLqD/";
 let video;
 let flippedVideo;
 let tmpi = 0;
@@ -95,6 +95,21 @@ let tmpTime;
 let realCurrTime = 0;
 let countDown;
 let tmpCount = 0;
+//EGG GAME
+let eggCoin = 0;
+let basket;
+let mybasket;
+let fallEggs = [];
+let fallPoints = 0;
+
+let eggLost = 0;
+let loseCounter = 0;
+let tmpj = 0;
+let eggInstruction;
+
+let readyToGo2 = false;
+let eggGameOver = false;
+let eggCount = 0;
 
 function preload() {
   ocean = loadImage("images/eco.png");
@@ -119,7 +134,7 @@ function preload() {
 
   groundL = loadImage("images/walkleft.gif");
   groundR = loadImage("images/walkright.gif");
-
+  streetSign = loadImage("images/streetsign.png");
   // HAMMER GAME -----------
   rac = loadImage("images/jump0001.png");
   hammer = loadImage("images/hammer.png");
@@ -129,6 +144,9 @@ function preload() {
   raccoonRight = loadImage("images/racRight.png");
   egg = loadImage("images/egg.png");
   classifier = ml5.imageClassifier(imageModelURL + "model.json");
+
+  // egg game------
+  basket = loadImage("images/basket.png");
 }
 
 function setup() {
@@ -280,6 +298,8 @@ function draw() {
         }
       }
       // SET UP FOR AR GAME
+      // MY EGG GAME
+      mybasket = new Basket();
     }
   }
   //===
@@ -293,6 +313,8 @@ function draw() {
     hammerGame();
   } else if (startFlag == 3) {
     ARgame();
+  } else if (startFlag == 4) {
+    eggGame();
   }
 }
 
@@ -312,7 +334,10 @@ function oldDraw() {
 
   // stroke("red");
   // strokeWeight(5);
+  tmpCount = 0;
   rect(50, 550, 1100, 200); // places to lay egg
+  image(streetSign, 100, 700, 50, 50);
+  image(streetSign, 1100, 70, 50, 50);
   for (let i = 0; i < turtles.length; i++) {
     if (turtles[i].alive == true) {
       turtEnd = 1;
@@ -466,6 +491,10 @@ function oldDraw() {
   if (myPerson.x <= 250 && myPerson.y >= 650) {
     startFlag = 3;
   }
+  //trigger egg ar game
+  if (myPerson.x <= 250 && myPerson.y <= 250 && !eggGameOver) {
+    startFlag = 4;
+  }
 }
 
 //AR GAME FUNCTIONS =======
@@ -475,6 +504,7 @@ function modelReady() {
 function classifyVideo() {
   flippedVideo = ml5.flipImage(capture);
   classifier.classify(flippedVideo, gotResult);
+  flippedVideo.remove();
 }
 
 function gotResult(error, results) {
@@ -485,7 +515,85 @@ function gotResult(error, results) {
   // console.log(results);
   label = results[0].label;
   console.log("label", label);
-  // classifyVideo();
+  classifyVideo();
+}
+function eggGame() {
+  background(0);
+  // Draw the video
+  imageMode(CORNER);
+  if (readyToGo) {
+    image(flippedVideo, 0, 0);
+
+    // Draw the label
+    fill(255);
+    textSize(16);
+    textAlign(CENTER);
+    text(label, width / 2, height - 4);
+
+    mybasket.display();
+    mybasket.move();
+    mybasket.checkCollision();
+    if (frameCount % 50 == 0) {
+      let tmpFallegg = new Fallegg();
+      fallEggs.push(tmpFallegg);
+    }
+    for (let e = 0; e < fallEggs.length; e++) {
+      fallEggs[e].display();
+      fallEggs[e].move();
+      if (fallEggs[e].y > 800) {
+        fallEggs.splice(e, 1);
+        e -= 1;
+        loseCounter += 1;
+      }
+      // if(fallEggs[e].loseFlag == 1){
+      //   loseCounter+=1;
+      // }
+    }
+    fill(255, 255, 255);
+    if (loseCounter >= 5) {
+      if (fallPoints >= 5) {
+        //won the game
+        eggLost = 0;
+        text("GAME OVER! YOU WON 200 COINS!", 400, height / 2);
+        eggCount += 1;
+        if (eggCoin == 0) {
+          coins += 200;
+          eggCoin = 1;
+        }
+      } else if (fallPoints < 5) {
+        //lost the game
+        eggLost = 1;
+        text("GAME OVER! YOU LOST! ", 400, height / 2);
+        eggCount += 1;
+      }
+      if (eggCount >= 100) {
+        clear();
+
+        eggInstruction.remove();
+        myPerson.x = 800;
+        myPerson.y = 550;
+        eggGameOver = true;
+        startFlag = 1;
+      }
+    }
+    textSize(18);
+    text("Eggs Caught:" + fallPoints, 100, 20);
+    text("Eggs Lost:" + loseCounter, 100, 40);
+    if (tmpj == 0) {
+      eggInstruction = createElement(
+        "p",
+        "Congratulations! You found a surprise ONE TIME game! <br>Catch at least 8 eggs before losing 5 eggs!<br><br> RIASE only your RIGHT HAND to let the basket move RIGHT and only your LEFT HAND for the basket to move LEFT.<br><br>Win to get 200 Coins! <br>"
+      );
+
+      eggInstruction.parent("#arfall");
+      tmpj += 1;
+    }
+  } else {
+    textSize(50);
+    textAlign(CENTER);
+    fill(255);
+    text("Video Loading", width / 2, height / 2);
+  }
 }
 function ARgame() {
   background(0);
@@ -517,7 +625,7 @@ function ARgame() {
     }
 
     // arInstruction.position(10, 830);
-    fill(255, 255, 255);
+    fill(0, 0, 0);
     currentTime += 1;
     if (currentTime % 60 == 0) {
       realCurrTime += 1;
@@ -529,7 +637,7 @@ function ARgame() {
     }
     text("TIME LEFT:" + tmpTime, 10, 20);
     console.log("num", arEggs.length);
-
+    fill(255, 255, 255);
     if (tmpTime <= 0) {
       tmpTime = 0;
       if (arEggs.length > 0) {
@@ -552,7 +660,7 @@ function ARgame() {
         arEggs = [];
         arRacs = [];
         clear();
-        capture.remove();
+
         arInstruction.remove();
         myPerson.x = 800;
         myPerson.y = 550;
@@ -675,6 +783,54 @@ function hammerGame() {
         startFlag = 1;
       }
     }
+  }
+}
+// egg game classes
+class Basket {
+  constructor() {
+    this.x = 400;
+    this.y = 600;
+  }
+  display() {
+    image(basket, this.x, this.y, 200, 200);
+  }
+  move() {
+    if (label == "left") {
+      if (this.x >= 0) {
+        this.x -= 5;
+      }
+    } else if (label == "right") {
+      if (this.x <= 1000) {
+        this.x += 5;
+      }
+    }
+  }
+  checkCollision() {
+    for (let i = 0; i < fallEggs.length; i++) {
+      if (
+        fallEggs[i].x >= this.x &&
+        fallEggs[i].x <= this.x + 180 &&
+        fallEggs[i].y > 600
+      ) {
+        console.log("EGG CAUGHT");
+        fallEggs.splice(i, 1);
+        i -= 1;
+        fallPoints += 1;
+      }
+    }
+  }
+}
+class Fallegg {
+  constructor() {
+    this.x = random(5, 700);
+    this.y = random(-120, -50);
+    this.loseFlag = 0;
+  }
+  display() {
+    image(egg, this.x, this.y, 100, 100);
+  }
+  move() {
+    this.y += 5;
   }
 }
 
