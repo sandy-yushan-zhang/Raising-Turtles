@@ -111,6 +111,26 @@ let readyToGo2 = false;
 let eggGameOver = false;
 let eggCount = 0;
 
+// FISHING GAME
+var yellow;
+var yellows = [];
+
+var person, boat, fishing;
+var fisherX = 100;
+var fisherXSpeed = 5;
+var hookX, hookY, hookNowY, hookEndY;
+var catching;
+var getting;
+var caughtFish;
+var fishingTimer = 2;
+var fishingPlaying;
+var fishingPoint = 0;
+var fishingStart = 0;
+var fishingIntro;
+var fishingRealStart = false;
+var fishingEndMessage;
+var fishingEnd = 0;
+
 function preload() {
   ocean = loadImage("images/eco.png");
   fish1L = loadImage("images/fish1L.png");
@@ -147,6 +167,12 @@ function preload() {
 
   // egg game------
   basket = loadImage("images/basket.png");
+
+  // FISHING GAME -----
+  yellow = loadImage("images/yellowFish.png");
+  person = loadImage("images/walkright.gif");
+  boat = loadImage("images/boat.png");
+  fishing = loadImage("images/fishing.png");
 }
 
 function setup() {
@@ -236,7 +262,7 @@ function draw() {
       }
       counterEnd += 1;
     } else if (
-      (startFlag == 1 || startFlag == 2 || startFlag == 3) &&
+      (startFlag == 1 || startFlag == 2 || startFlag == 3 || startFlag == 5) &&
       counterStart < 1
     ) {
       let buttonStartEle = document.getElementById("buttonStart");
@@ -297,7 +323,21 @@ function draw() {
           holes.push(hole);
         }
       }
-      // SET UP FOR AR GAME
+      // FISHING GAME ---------------
+      hookX = fisherX + 215;
+      hookY = 68;
+      hookEndY = hookY;
+      hookNowY = hookY;
+      catching = false;
+      getting = false;
+      caughtFish = false;
+      fishingPlaying = true;
+
+      for (let i = 0; i < 20; i++) {
+        yellows.push(new Yellow());
+      }
+
+      // SET UP FOR AR GAME --------------
       // MY EGG GAME
       mybasket = new Basket();
     }
@@ -315,6 +355,8 @@ function draw() {
     ARgame();
   } else if (startFlag == 4) {
     eggGame();
+  } else if (startFlag == 5) {
+    fishingGame();
   }
 }
 
@@ -483,7 +525,8 @@ function oldDraw() {
   text("Coins Left:  " + coins, 900, 870);
 
   // TRIGGER HAMMER GAME
-  if (myPerson.x == 1150 && myPerson.y == 750 && !gameOver) {
+  // console.log(myPerson.x);
+  if (myPerson.x >= 1145 && myPerson.y >= 650 && !gameOver) {
     startFlag = 2;
   }
 
@@ -491,9 +534,16 @@ function oldDraw() {
   if (myPerson.x <= 250 && myPerson.y >= 650) {
     startFlag = 3;
   }
-  //trigger egg ar game
+
+  //Trigger egg ar game
   if (myPerson.x <= 250 && myPerson.y <= 250 && !eggGameOver) {
     startFlag = 4;
+  }
+
+  // TRIGGER FISHING GAME
+  console.log(startFlag);
+  if (myPerson.x >= 1037 && myPerson.y >= 65 && myPerson.y <= 110) {
+    startFlag = 5;
   }
 }
 
@@ -517,6 +567,7 @@ function gotResult(error, results) {
   console.log("label", label);
   classifyVideo();
 }
+
 function eggGame() {
   background(0);
   // Draw the video
@@ -595,6 +646,7 @@ function eggGame() {
     text("Video Loading", width / 2, height / 2);
   }
 }
+
 function ARgame() {
   background(0);
   imageMode(CORNER);
@@ -704,13 +756,14 @@ function ARgame() {
     text("Video Loading", width / 2, height / 2);
   }
 }
+
 function hammerGame() {
   image(ocean, 0, 0, 1200, 800);
 
   if (hammerStart <= 120) {
     hammerIntro = createElement(
-      "h1",
-      "Welcome to Whack-A-Raccoon!<br>You have 20 seconds.<br>Each Score = 50 Coins<br><br>Ready... GO!"
+      "h2",
+      "Welcome to Whack-A-Raccoon! <br>You found a surprise one-time game!<br>You have 20 seconds.<br>Each Score = 50 Coins<br><br>Ready... GO!"
     );
     hammerIntro.id("hammerIntro");
     hammerIntro.parent("#container");
@@ -785,6 +838,216 @@ function hammerGame() {
     }
   }
 }
+
+function fishingGame() {
+  image(ocean, 0, 0, 1200, 800);
+
+  if (fishingStart <= 160) {
+    fishingIntro = createElement(
+      "h2",
+      "Welcome to Fishing Game!<br>Click the mouse to fish!<br>You have 20 seconds. <br> Each fish you caught = 50 coins.<br><br>Ready...GO!"
+    );
+    fishingIntro.id("fishingIntro");
+    fishingIntro.parent("#container");
+    fishingIntro.position(240, 270);
+    fishingStart++;
+  } else {
+    let fishingIntroEle = document.getElementById("fishingIntro");
+    if (fishingIntroEle != null) {
+      fishingIntroEle.remove();
+    }
+    fishingStart++;
+    if (fishingStart >= 360) {
+      fishingRealStart = true;
+    }
+  }
+
+  if (fishingRealStart) {
+    // POINTS
+    if (fishingPlaying) {
+      let temp = 0;
+      for (let i = 0; i < yellows.length; i++) {
+        if (yellows[i].caught) {
+          temp++;
+        }
+      }
+      fishingPoint = temp;
+    }
+
+    noStroke();
+    textSize(30);
+    text("Points:", 900, 700);
+    text(fishingPoint, 1000, 700);
+
+    // TIMER
+    if (frameCount % 60 == 0 && fishingTimer > 0) {
+      fishingTimer--;
+    }
+    if (fishingTimer == 0) {
+      fishingPlaying = false;
+    }
+    text("Time Left:", 900, 650);
+    if (fishingTimer >= 10) {
+      text("0:" + fishingTimer, 1050, 650);
+    } else if (fishingTimer < 10) {
+      text("0:0" + fishingTimer, 1050, 650);
+    }
+
+    person.setFrame(10);
+
+    image(boat, fisherX, -15, 100, 150);
+    image(person, fisherX + 35, 25, 70, 70);
+    image(fishing, fisherX + 70, 57, 150, 30);
+
+    if (keyIsDown(65) || keyIsDown(97)) {
+      fisherX -= fisherXSpeed;
+      hookX -= fisherXSpeed;
+      if (fisherX <= -60) {
+        fisherX = -60;
+        hookX = fisherX + 215;
+      }
+    }
+    if (keyIsDown(68) || keyIsDown(100)) {
+      fisherX += fisherXSpeed;
+      hookX += fisherXSpeed;
+      if (fisherX >= 970) {
+        fisherX = 970;
+        hookX = fisherX + 215;
+      }
+    }
+
+    if (fishingPlaying) {
+      stroke("black");
+      strokeWeight(2);
+      line(hookX, hookY, hookX, hookNowY);
+    }
+
+    for (let i = 0; i < yellows.length; i++) {
+      let d = dist(yellows[i].x + 30, yellows[i].y + 20, hookX, hookNowY);
+      if (d <= 20 && fishingPlaying) {
+        yellows[i].caught = true;
+        caughtFish = true;
+      }
+      yellows[i].move();
+    }
+
+    // CATCHING FISH ALGO
+    if (fishingPlaying) {
+      if (caughtFish) {
+        fisherXSpeed = 0;
+        if (hookNowY >= hookY) {
+          hookNowY -= 3;
+        }
+        if (hookNowY <= hookY) {
+          getting = false;
+          caughtFish = false;
+          catching = false;
+          fisherXSpeed = 5;
+        }
+      } else if (catching) {
+        if (hookNowY <= hookEndY) {
+          hookNowY += 3;
+        } else {
+          catching = false;
+          getting = true;
+        }
+      } else if (!catching) {
+        if (hookNowY >= hookY) {
+          hookNowY -= 3;
+        }
+        if (hookNowY <= hookY) {
+          getting = false;
+        }
+      }
+    }
+
+    // GAME OVER
+    if (!fishingPlaying) {
+      // fishingEndMessage = createElement("h1", "GAME OVER");
+      // fishingEndMessage.id("fishingEndMessage");
+      // fishingEndMessage.parent("#container");
+      // fishingEndMessage.position(570, 400);
+      fishingEnd += 1;
+
+      if (fishingEnd >= 120) {
+        // console.log("XXXXXXXXXXXXXXX");
+        // fishingEndMessage.remove();
+        // let fishingEndEle = document.getElementById("fishingEndMessage");
+        // if (fishingEndEle != null) {
+        //   fishingEndEle.remove();
+        // }
+        coins += 50 * fishingPoint;
+        fishingPoint = 0;
+        fishingStart = 0;
+        fishingPlaying = true;
+        fishingRealStart = false;
+        fishingEnd = 0;
+        fishingTimer = 20;
+        myPerson.x = 800;
+        myPerson.y = 200;
+        startFlag = 1;
+      }
+    }
+  }
+}
+
+class Yellow {
+  constructor() {
+    this.x = random(1250, 2500);
+    this.y = random(200, 470);
+    this.len = 60;
+    this.hei = 40;
+    this.xMove = random(1, 3);
+    this.yMove = random(-1.5, 1.5);
+    this.noiseXLoc = random(1000);
+    this.noiseYLoc = random(1000, 2000);
+
+    this.upBound = random(0, 100);
+    this.lowBound = random(400, 500);
+    this.out = false;
+    this.caught = false;
+    this.cage = false;
+  }
+
+  move() {
+    image(yellow, this.x, this.y, this.len, this.hei);
+    let moveX = map(noise(this.noiseXLoc), 0, 1, -1, -3);
+    let moveY = map(noise(this.noiseYLoc), 0, 1, -1.5, 1.5);
+    if (!this.caught) {
+      this.x += moveX;
+      this.y += moveY;
+      if (this.x <= -20) {
+        this.x = random(1300, 2000);
+      }
+      if (this.y > 500) {
+        this.y = 500;
+      } else if (this.y < 200) {
+        this.y = 200;
+      }
+      this.noiseXLoc += 0.01;
+      this.noiseYLoc += 0.01;
+    } else {
+      if (!this.cage) {
+        this.y -= 3;
+        if (this.y <= hookY) {
+          this.x = random(400, 800);
+          this.y = random(650, 700);
+          this.xMove = 0;
+          this.yMove = 0;
+          this.cage = true;
+        }
+      }
+    }
+  }
+}
+
+function mousePressed() {
+  if (!catching && !getting) {
+    catching = true;
+    hookEndY = mouseY;
+  }
+}
+
 // egg game classes
 class Basket {
   constructor() {
@@ -856,7 +1119,7 @@ class Buttons {
     d = dist(mouseX, mouseY, this.x, this.y);
     // console.log(d);
     if (mouseIsPressed == true && d <= 40) {
-      console.log("button press");
+      //console.log("button press");
       if (coins - this.price < 0 || coins == 0) {
         coinFlag = 1;
       } else if (coins - this.price > 0) {
@@ -865,7 +1128,7 @@ class Buttons {
       if (coinFlag == 0) {
         coins -= this.price;
         if (this.type == "turt") {
-          console.log("what");
+          //console.log("what");
           turtCount += 1;
           let turtBut = new Turtle(0);
           turtles.push(turtBut);
@@ -1122,7 +1385,7 @@ class Person {
         }
       }
     } else if (this.state == "swim") {
-      console.log(swimU.numFrames());
+      //console.log(swimU.numFrames());
       if (this.d == "up") {
         swimU.setFrame(this.currentFrame2);
         this.currentFrame2 += 1;
