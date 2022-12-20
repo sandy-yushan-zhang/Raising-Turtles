@@ -95,6 +95,9 @@ let tmpTime;
 let realCurrTime = 0;
 let countDown;
 let tmpCount = 0;
+
+let arIntro;
+let arStart = 0;
 //EGG GAME
 let eggCoin = 0;
 let basket;
@@ -111,6 +114,9 @@ let readyToGo2 = false;
 let eggGameOver = false;
 let eggCount = 0;
 
+let eggStart = 0;
+let eggIntro;
+let tmpLose = 0;
 // FISHING GAME
 var yellow;
 var yellows = [];
@@ -541,7 +547,7 @@ function oldDraw() {
   }
 
   // TRIGGER FISHING GAME
-  console.log(startFlag);
+  // console.log(startFlag);
   if (myPerson.x >= 1037 && myPerson.y >= 65 && myPerson.y <= 110) {
     startFlag = 5;
   }
@@ -564,196 +570,244 @@ function gotResult(error, results) {
   }
   // console.log(results);
   label = results[0].label;
-  console.log("label", label);
+  // console.log("label", label);
   classifyVideo();
 }
 
 function eggGame() {
-  background(0);
-  // Draw the video
-  imageMode(CORNER);
-  if (readyToGo) {
-    image(flippedVideo, 0, 0);
-
-    // Draw the label
-    fill(255);
-    textSize(16);
-    textAlign(CENTER);
-    text(label, width / 2, height - 4);
-
-    mybasket.display();
-    mybasket.move();
-    mybasket.checkCollision();
-    if (frameCount % 50 == 0) {
-      let tmpFallegg = new Fallegg();
-      fallEggs.push(tmpFallegg);
+  let eggIntroEle = document.getElementById("eggIntro");
+  if (eggStart <= 200) {
+    image(ocean, 0, 0, 1200, 800);
+    eggIntro = createElement(
+      "p",
+      "REDIRECTING... You found a surprise ONE TIME game! <br>Catch at least 8 eggs before losing 5 eggs!<br><br> RIASE only your RIGHT HAND to let the basket move RIGHT <br><br> Raise only your LEFT HAND for the basket to move LEFT.<br><br>Win to get 200 Coins! <br>"
+    );
+    eggIntro.id("eggIntro");
+    eggIntro.parent("#container");
+    eggIntro.position(350, 300);
+    eggStart++;
+  } else if (eggStart > 200) {
+    eggIntroEle = document.getElementById("eggIntro");
+    if (eggIntroEle != null) {
+      eggIntroEle.remove();
     }
-    for (let e = 0; e < fallEggs.length; e++) {
-      fallEggs[e].display();
-      fallEggs[e].move();
-      if (fallEggs[e].y > 800) {
-        fallEggs.splice(e, 1);
-        e -= 1;
-        loseCounter += 1;
+  }
+  if (eggIntroEle == null && eggStart > 200) {
+    background(0);
+    // Draw the video
+    imageMode(CORNER);
+    if (readyToGo) {
+      image(flippedVideo, 0, 0);
+
+      // Draw the label
+      fill(255);
+      textSize(16);
+      textAlign(CENTER);
+      text(label, width / 2, height - 4);
+
+      mybasket.display();
+      mybasket.move();
+      mybasket.checkCollision();
+      if (frameCount % 50 == 0) {
+        let tmpFallegg = new Fallegg();
+        fallEggs.push(tmpFallegg);
       }
-      // if(fallEggs[e].loseFlag == 1){
-      //   loseCounter+=1;
-      // }
-    }
-    fill(255, 255, 255);
-    if (loseCounter >= 5) {
-      if (fallPoints >= 5) {
-        //won the game
-        eggLost = 0;
-        text("GAME OVER! YOU WON 200 COINS!", 400, height / 2);
-        eggCount += 1;
-        if (eggCoin == 0) {
-          coins += 200;
-          eggCoin = 1;
+      for (let e = 0; e < fallEggs.length; e++) {
+        if (loseCounter < 5) {
+          fallEggs[e].display();
+          fallEggs[e].move();
         }
-      } else if (fallPoints < 5) {
-        //lost the game
-        eggLost = 1;
-        text("GAME OVER! YOU LOST! ", 400, height / 2);
-        eggCount += 1;
+        if (fallEggs[e].y > 800) {
+          fallEggs.splice(e, 1);
+          e -= 1;
+          loseCounter += 1;
+        }
+        // if(fallEggs[e].loseFlag == 1){
+        //   loseCounter+=1;
+        // }
       }
-      if (eggCount >= 100) {
-        clear();
+      fill(255, 255, 255);
+      if (loseCounter >= 5) {
+        if (fallPoints >= 5) {
+          //won the game
+          console.log("fall");
+          eggLost = 0;
+          text("GAME OVER! YOU WON 200 COINS!", 500, height / 2);
+          eggCount += 1;
+          if (eggCoin == 0) {
+            coins += 200;
+            eggCoin = 1;
+          }
+          tmpLose = 1;
+        } else if (fallPoints < 5) {
+          //lost the game
+          console.log("nofall");
+          eggLost = 1;
+          textSize(38);
+          text("GAME OVER! YOU LOST! ", 500, height / 2);
+          eggCount += 1;
+          tmpLose = 1;
+        }
+        if (eggCount >= 100) {
+          clear();
 
-        eggInstruction.remove();
-        myPerson.x = 800;
-        myPerson.y = 550;
-        eggGameOver = true;
-        startFlag = 1;
+          // eggInstruction.remove();
+          myPerson.x = 800;
+          myPerson.y = 550;
+          eggGameOver = true;
+          startFlag = 1;
+        }
       }
-    }
-    textSize(18);
-    text("Eggs Caught:" + fallPoints, 100, 20);
-    text("Eggs Lost:" + loseCounter, 100, 40);
-    if (tmpj == 0) {
-      eggInstruction = createElement(
-        "p",
-        "Congratulations! You found a surprise ONE TIME game! <br>Catch at least 8 eggs before losing 5 eggs!<br><br> RIASE only your RIGHT HAND to let the basket move RIGHT and only your LEFT HAND for the basket to move LEFT.<br><br>Win to get 200 Coins! <br>"
-      );
+      textSize(18);
+      text("Eggs Caught:" + fallPoints, 100, 20);
+      text("Eggs Lost:" + loseCounter, 100, 40);
+      // if (tmpj == 0) {
+      //   eggInstruction = createElement(
+      //     "p",
+      //     "Congratulations! You found a surprise ONE TIME game! <br>Catch at least 8 eggs before losing 5 eggs!<br><br> RIASE only your RIGHT HAND to let the basket move RIGHT and only your LEFT HAND for the basket to move LEFT.<br><br>Win to get 200 Coins! <br>"
+      //   );
 
-      eggInstruction.parent("#arfall");
-      tmpj += 1;
+      //   eggInstruction.parent("#arfall");
+      //   tmpj += 1;
+      // }
+    } else {
+      textSize(50);
+      textAlign(CENTER);
+      fill(255);
+      text("Video Loading", width / 2, height / 2);
     }
-  } else {
-    textSize(50);
-    textAlign(CENTER);
-    fill(255);
-    text("Video Loading", width / 2, height / 2);
   }
 }
 
 function ARgame() {
-  background(0);
-  imageMode(CORNER);
-  // image(capture, 0, 0, 1200, 800);
+  let arIntroEle = document.getElementById("arIntro");
+  if (arStart <= 120) {
+    image(ocean, 0, 0, 1200, 800);
+    arIntro = createElement(
+      "p",
+      "REDIRECTING... <br>For around 60 seconds, avoid the raccons to eat all the eggs by:<br> using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds, you get 50 coins!"
+    );
+    arIntro.id("arIntro");
+    arIntro.parent("#container");
+    arIntro.position(250, 300);
+    arStart++;
+  } else if (arStart > 120) {
+    arIntroEle = document.getElementById("arIntro");
+    if (arIntroEle != null) {
+      arIntroEle.remove();
+    }
+  }
+  if (arIntroEle == null && arStart > 120) {
+    let arIntroEle = document.getElementById("arIntro");
+    if (arIntroEle != null) {
+      arIntroEle.remove();
+    }
+    background(0);
+    imageMode(CORNER);
+    // image(capture, 0, 0, 1200, 800);
 
-  if (readyToGo) {
-    image(capture, 0, 0, 1200, 800);
+    if (readyToGo) {
+      image(capture, 0, 0, 1200, 800);
 
-    fill(255, 255, 0);
+      fill(255, 255, 0);
 
-    if (poses.length > 0 && poses[0].pose.nose) {
-      let noseX = poses[0].pose.nose.x;
-      let noseY = poses[0].pose.nose.y;
+      if (poses.length > 0 && poses[0].pose.nose) {
+        let noseX = poses[0].pose.nose.x;
+        let noseY = poses[0].pose.nose.y;
 
-      fill(0, 0, 255);
-      ellipse(noseX, noseY, 50, 50);
-      for (let num1 = 0; num1 < arRacs.length; num1++) {
-        if (dist(noseX, noseY, arRacs[num1].x, arRacs[num1].y) < 40) {
-          if (arRacs[num1].direction == "right") {
-            arRacs[num1].x += random(30, 60);
-            arRacs[num1].y += random(-10, 10);
-          } else if (arRacs[num1].direction == "left") {
-            arRacs[num1].x -= random(50, 90);
-            arRacs[num1].y += random(-20, 20);
+        fill(0, 0, 255);
+        ellipse(noseX, noseY, 50, 50);
+        for (let num1 = 0; num1 < arRacs.length; num1++) {
+          if (dist(noseX, noseY, arRacs[num1].x, arRacs[num1].y) < 40) {
+            if (arRacs[num1].direction == "right") {
+              arRacs[num1].x += random(30, 60);
+              arRacs[num1].y += random(-10, 10);
+            } else if (arRacs[num1].direction == "left") {
+              arRacs[num1].x -= random(50, 90);
+              arRacs[num1].y += random(-20, 20);
+            }
           }
         }
       }
-    }
 
-    // arInstruction.position(10, 830);
-    fill(0, 0, 0);
-    currentTime += 1;
-    if (currentTime % 60 == 0) {
-      realCurrTime += 1;
-    }
-    textSize(18);
-    tmpTime = timeLimit - realCurrTime;
-    if (tmpTime < 0) {
-      tmpTime = 0;
-    }
-    text("TIME LEFT:" + tmpTime, 10, 20);
-    console.log("num", arEggs.length);
-    fill(255, 255, 255);
-    if (tmpTime <= 0) {
-      tmpTime = 0;
-      if (arEggs.length > 0) {
-        arRacs = [];
-        textSize(38);
-        if (arcion == 0) {
-          coins += 50;
-          arcion = 1;
+      // arInstruction.position(10, 830);
+      fill(0, 0, 0);
+      currentTime += 1;
+      if (currentTime % 25 == 0) {
+        realCurrTime += 1;
+      }
+      textSize(18);
+      tmpTime = timeLimit - realCurrTime;
+      if (tmpTime < 0) {
+        tmpTime = 0;
+      }
+      text("TIME LEFT:" + tmpTime, 10, 20);
+      // console.log("num", arEggs.length);
+      fill(255, 255, 255);
+      if (tmpTime <= 0) {
+        tmpTime = 0;
+        if (arEggs.length > 0) {
+          arRacs = [];
+          textSize(38);
+          if (arcion == 0) {
+            coins += 50;
+            arcion = 1;
+          }
+          tmpCount += 1;
+          text("GAME OVER! YOU WON 50 COINS!", 400, height / 2);
+        } else if (arEggs.length <= 0) {
+          arEggs = [];
+          arRacs = [];
+          textSize(38);
+          tmpCount += 1;
+          text("GAME OVER! YOU LOST!", 450, height / 2);
         }
-        tmpCount += 1;
-        text("GAME OVER! YOU WON 50 COINS!", 400, height / 2);
-      } else if (arEggs.length <= 0) {
-        arEggs = [];
-        arRacs = [];
-        textSize(38);
-        tmpCount += 1;
-        text("GAME OVER! YOU LOST!", 450, height / 2);
-      }
-      if (tmpCount >= 100) {
-        arEggs = [];
-        arRacs = [];
-        clear();
+        if (tmpCount >= 100) {
+          arEggs = [];
+          arRacs = [];
+          clear();
 
-        arInstruction.remove();
-        myPerson.x = 800;
-        myPerson.y = 550;
-        startFlag = 1;
+          myPerson.x = 800;
+          myPerson.y = 550;
+          startFlag = 1;
+        }
       }
-    }
-    push();
-    imageMode(CENTER);
-    for (let j = 0; j < arEggs.length; j++) {
-      if (arEggs[j].isAlive == false) {
-        arEggs.splice(j, 1);
-        j -= 1;
-      } else if (arEggs[j].isAlive == true) {
-        arEggs[j].display();
+      push();
+      imageMode(CENTER);
+      for (let j = 0; j < arEggs.length; j++) {
+        if (arEggs[j].isAlive == false) {
+          arEggs.splice(j, 1);
+          j -= 1;
+        } else if (arEggs[j].isAlive == true) {
+          arEggs[j].display();
+        }
       }
-    }
-    for (let i = 0; i < arRacs.length; i++) {
-      arRacs[i].display();
-      arRacs[i].moveAR();
-      arRacs[i].checkCollisionAR();
-      // arRacs[i].checkCollision();
-      // if (arRacs[i].alive == false) {
-      //   arRacs.splice(i, 1);
-      //   i -= 1;
+      for (let i = 0; i < arRacs.length; i++) {
+        arRacs[i].display();
+        arRacs[i].moveAR();
+        arRacs[i].checkCollisionAR();
+        // arRacs[i].checkCollision();
+        // if (arRacs[i].alive == false) {
+        //   arRacs.splice(i, 1);
+        //   i -= 1;
+        // }
+      }
+
+      // if (tmpi == 0) {
+      //   arInstruction = createElement(
+      //     "p",
+      //     "For around 60 seconds, avoid the raccons to eat all the eggs by using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds, you get 50 coins!"
+      //   );
+
+      //   arInstruction.parent("#arins");
+      //   tmpi += 1;
       // }
+    } else {
+      textSize(50);
+      textAlign(CENTER);
+      fill(255);
+      text("Video Loading", width / 2, height / 2);
     }
-
-    if (tmpi == 0) {
-      arInstruction = createElement(
-        "p",
-        "For around 60 seconds, avoid the raccons to eat all the eggs by using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds, you get 50 coins!"
-      );
-
-      arInstruction.parent("#arins");
-      tmpi += 1;
-    }
-  } else {
-    textSize(50);
-    textAlign(CENTER);
-    fill(255);
-    text("Video Loading", width / 2, height / 2);
   }
 }
 
@@ -1075,7 +1129,7 @@ class Basket {
         fallEggs[i].x <= this.x + 180 &&
         fallEggs[i].y > 600
       ) {
-        console.log("EGG CAUGHT");
+        // console.log("EGG CAUGHT");
         fallEggs.splice(i, 1);
         i -= 1;
         fallPoints += 1;
@@ -1879,10 +1933,10 @@ class Egg {
   }
 
   turtleBorn() {
-    console.log("IN TURTLE BORN");
+    // console.log("IN TURTLE BORN");
     if (this.isAlive) {
       if (this.birthTime % this.bornTime == 0) {
-        console.log("BORN");
+        // console.log("BORN");
         turtCount += 1;
         turtles.push(new Turtle(1, this.x, this.y));
         this.isAlive = false;
@@ -1893,7 +1947,7 @@ class Egg {
 }
 
 function gameStart() {
-  console.log("hi");
+  // console.log("hi");
   startFlag = 1;
   // storeItem("startFlag", 0);
 }
