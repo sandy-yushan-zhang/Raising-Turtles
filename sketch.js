@@ -463,7 +463,7 @@ function oldDraw() {
   }
 
   //TRIGGER AR GAME
-  if (myPerson.x <= 250 && myPerson.y >= 650 && !gameOver) {
+  if (myPerson.x <= 250 && myPerson.y >= 650) {
     startFlag = 3;
   }
 }
