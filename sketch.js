@@ -128,7 +128,7 @@ var hookX, hookY, hookNowY, hookEndY;
 var catching;
 var getting;
 var caughtFish;
-var fishingTimer = 2;
+var fishingTimer = 20;
 var fishingPlaying;
 var fishingPoint = 0;
 var fishingStart = 0;
@@ -686,11 +686,11 @@ function ARgame() {
     image(ocean, 0, 0, 1200, 800);
     arIntro = createElement(
       "p",
-      "REDIRECTING... <br>For around 60 seconds, avoid the raccons to eat all the eggs by:<br> using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds, you get 50 coins!"
+      "REDIRECTING... <br>For around 60 seconds, <br>avoid the raccons to eat all the eggs by:<br> using your nose to bounce back the raccons!<br><br> If there are still eggs left after 60 seconds,<br> you get 50 coins!"
     );
     arIntro.id("arIntro");
     arIntro.parent("#container");
-    arIntro.position(250, 300);
+    arIntro.position(400, 300);
     arStart++;
   } else if (arStart > 120) {
     arIntroEle = document.getElementById("arIntro");
@@ -822,7 +822,7 @@ function hammerGame() {
     );
     hammerIntro.id("hammerIntro");
     hammerIntro.parent("#container");
-    hammerIntro.position(210, 300);
+    hammerIntro.position(300, 300);
     hammerStart++;
   } else {
     let hammerIntroEle = document.getElementById("hammerIntro");
@@ -903,7 +903,7 @@ function fishingGame() {
     );
     fishingIntro.id("fishingIntro");
     fishingIntro.parent("#container");
-    fishingIntro.position(280, 270);
+    fishingIntro.position(400, 270);
     fishingStart++;
   } else {
     let fishingIntroEle = document.getElementById("fishingIntro");
