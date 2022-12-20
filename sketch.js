@@ -239,7 +239,7 @@ function draw() {
     //getItem("startFlag") == null
     if (startFlag == 0 && counter < 1) {
       intro = createP(
-        "How To Play<br>To Win: Keep every species alive, not just turtles. Raise as many turtles as you can. <br> The game ends if: Any of the species dies out. Meaning you lose if any species die to the population of 0. <br> How to prevent losing: You can use points to buy species to earn more opportunities. And it is your decision on when to buy those species to win the game. You only get 500 coins and the number of coins will not change. <br>The objective: To raise as many turtles as possible. When your system dies, the system will tell you how many turtles you have raised. <br> Rules: Turtles eat fish, sharks eat turtles. Raccoons eat turtles' eggs."
+        "How To Play<br>To Win: Keep every species alive, not just turtles. Raise as many turtles as you can. <br> The game ends if: Any of the species dies out. Meaning you lose if any species die to the population of 0. <br> How to prevent losing: You can control the character to find entrances to small games. Winning the games will help you earn coins. Coins can be used to buy species to earn more opportunities. And it is your decision on when to buy those species to win the game. You do not have any coin to start with. <br>The objective: To raise as many turtles as possible. When your system dies, the system will tell you how many turtles you have raised. <br> Rules: Turtles eat fish, sharks eat turtles. Raccoons eat turtles' eggs."
       );
       buttonStart = createButton("Click To Start");
       intro.id("intro");
@@ -632,6 +632,7 @@ function eggGame() {
           //won the game
           console.log("fall");
           eggLost = 0;
+          textSize(38);
           text("GAME OVER! YOU WON 200 COINS!", 500, height / 2);
           eggCount += 1;
           if (eggCoin == 0) {
@@ -817,11 +818,11 @@ function hammerGame() {
   if (hammerStart <= 120) {
     hammerIntro = createElement(
       "h2",
-      "Welcome to Whack-A-Raccoon! <br>You found a surprise one-time game!<br>You have 20 seconds.<br>Each Score = 50 Coins<br><br>Ready... GO!"
+      "Redirecting to Whack-A-Raccoon! <br>You found a surprise one-time game!<br>You have 20 seconds.<br>Each Score = 50 Coins<br><br>Ready... GO!"
     );
     hammerIntro.id("hammerIntro");
     hammerIntro.parent("#container");
-    hammerIntro.position(175, 300);
+    hammerIntro.position(210, 300);
     hammerStart++;
   } else {
     let hammerIntroEle = document.getElementById("hammerIntro");
@@ -877,15 +878,14 @@ function hammerGame() {
         holes.forEach(function (each) {
           each.racAppear = false;
         });
-        hammerEndMessage = createElement("h1", "GAME OVER");
-        hammerEndMessage.id("hammerIntro");
-        hammerEndMessage.parent("#container");
-        hammerEndMessage.position(570, 400);
+        textSize(50);
+        text("TIME'S UP!", 470, 300);
+        text("Coins you have earned:", 300, 400);
+        text(50 * score, 830, 400);
 
         hammerEnd += 1;
       }
-      if (hammerEnd >= 240) {
-        hammerEndMessage.remove();
+      if (hammerEnd >= 180) {
         coins += score * 50;
         startFlag = 1;
       }
@@ -899,11 +899,11 @@ function fishingGame() {
   if (fishingStart <= 160) {
     fishingIntro = createElement(
       "h2",
-      "Welcome to Fishing Game!<br>Click the mouse to fish!<br>You have 20 seconds. <br> Each fish you caught = 50 coins.<br><br>Ready...GO!"
+      "Redirecting to Fishing Game!<br>Click the mouse to fish!<br>You have 20 seconds. <br> Each fish you caught = 50 coins.<br><br>Ready... GO!"
     );
     fishingIntro.id("fishingIntro");
     fishingIntro.parent("#container");
-    fishingIntro.position(240, 270);
+    fishingIntro.position(280, 270);
     fishingStart++;
   } else {
     let fishingIntroEle = document.getElementById("fishingIntro");
@@ -1017,19 +1017,14 @@ function fishingGame() {
 
     // GAME OVER
     if (!fishingPlaying) {
-      // fishingEndMessage = createElement("h1", "GAME OVER");
-      // fishingEndMessage.id("fishingEndMessage");
-      // fishingEndMessage.parent("#container");
-      // fishingEndMessage.position(570, 400);
+      textSize(50);
+      text("TIME'S UP!", 470, 300);
+      text("Coins you have earned:", 300, 400);
+      text(50 * fishingPoint, 830, 400);
+
       fishingEnd += 1;
 
-      if (fishingEnd >= 120) {
-        // console.log("XXXXXXXXXXXXXXX");
-        // fishingEndMessage.remove();
-        // let fishingEndEle = document.getElementById("fishingEndMessage");
-        // if (fishingEndEle != null) {
-        //   fishingEndEle.remove();
-        // }
+      if (fishingEnd >= 180) {
         coins += 50 * fishingPoint;
         fishingPoint = 0;
         fishingStart = 0;
@@ -1039,6 +1034,8 @@ function fishingGame() {
         fishingTimer = 20;
         myPerson.x = 800;
         myPerson.y = 200;
+        hookEndY = hookY;
+        hookNowY = hookY;
         startFlag = 1;
       }
     }
